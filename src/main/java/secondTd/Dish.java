@@ -19,11 +19,10 @@ public class Dish {
   public Dish() {}
 
   public Double getDishPrice() {
-    double price = 0;
-    for (Ingredient ingredient : ingredients) {
-      price += ingredient.getPrice();
+    if (ingredients == null) {
+      throw new RuntimeException("dish cannot be null");
     }
-    return price;
+    return ingredients.stream().mapToDouble((e) -> e.getPrice()).sum();
   }
 
   public int getId() {
