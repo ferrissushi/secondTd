@@ -1,4 +1,4 @@
-package secondTd;
+package secondTd.db;
 
 import io.github.cdimascio.dotenv.Dotenv;
 import java.sql.Connection;

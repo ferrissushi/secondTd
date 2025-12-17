@@ -1,5 +1,8 @@
 package secondTd;
 
+import secondTd.model.Ingredient;
+import secondTd.service.DataRetriever;
+
 import java.util.List;
 
 /**

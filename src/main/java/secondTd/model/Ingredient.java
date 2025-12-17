@@ -1,4 +1,4 @@
-package secondTd;
+package secondTd.model;
 
 public class Ingredient {
   private int id;

@@ -1,4 +1,10 @@
-package secondTd;
+package secondTd.service;
+
+import secondTd.db.DBConnection;
+import secondTd.model.CategoryEnum;
+import secondTd.model.Dish;
+import secondTd.model.DishTypeEnum;
+import secondTd.model.Ingredient;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
