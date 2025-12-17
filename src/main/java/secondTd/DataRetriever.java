@@ -11,6 +11,10 @@ public class DataRetriever {
 
   private DBConnection dbConnection;
 
+  public DataRetriever() {
+    this.dbConnection = new DBConnection();
+  }
+
   public Dish findDishById(Integer id) {
     Dish dish = null;
     List<Ingredient> ingredients = new ArrayList<>();
@@ -58,13 +62,13 @@ public class DataRetriever {
   }
 
   public List<Ingredient> findIngredients(int page, int size) {
-    int offset = (page - 1) * size;
-    if (page < 1 || offset < 1) {
-      throw new IllegalArgumentException("Page and offset must be greater than 0");
+    if (page < 1 || size < 1) {
+      throw new IllegalArgumentException("Page and size must be greater than 0");
     }
+    int offset = (page - 1) * size;
     List<Ingredient> ingredients = new ArrayList<>();
     String sql = """
-      select i.id, i.name, i.price, i.category, d.id dish_id, d.name dish_name, d.dish_type dish_type
+      select i.id ingredient_id, i.name ingredient_name, i.price ingredient_price, i.category ingredient_category, d.id, d.name, d.dish_type
       from ingredient i left join dish d on i.id_dish = d.id
       order by i.id asc limit ? offset ?;
     """;

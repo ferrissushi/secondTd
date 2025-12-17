@@ -18,6 +18,9 @@ public class Ingredient {
   public Ingredient() {}
 
   public String getDishName() {
+    if (dish != null) {
+      throw new RuntimeException("Dish cannot be null");
+    }
     return dish.getName();
   }
 
@@ -59,5 +62,18 @@ public class Ingredient {
 
   public void setDish(Dish dish) {
     this.dish = dish;
+  }
+
+  @Override
+  public String toString() {
+    return "Ingredient [id="
+        + id
+        + ", name="
+        + name
+        + ", price="
+        + price
+        + ", category="
+        + category
+        + "]";
   }
 }

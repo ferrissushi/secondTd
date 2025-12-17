@@ -1,5 +1,6 @@
 package secondTd;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class Dish {
@@ -14,7 +15,6 @@ public class Dish {
     this.dishType = dishType;
     this.ingredients = ingredients;
   }
-
 
   public Dish() {}
 
@@ -56,5 +56,15 @@ public class Dish {
 
   public void setIngredients(List<Ingredient> ingredients) {
     this.ingredients = ingredients;
+  }
+
+  @Override
+  public String toString() {
+    return "Dish{" +
+            "id=" + id +
+            ", name='" + name + '\'' +
+            ", dishType=" + dishType +
+            ", ingredients=" + ingredients.toString() +
+            '}';
   }
 }
