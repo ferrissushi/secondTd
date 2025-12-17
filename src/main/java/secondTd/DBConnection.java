@@ -1,16 +1,31 @@
 package secondTd;
 
 import io.github.cdimascio.dotenv.Dotenv;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.SQLException;
 
 public class DBConnection {
-  private final String URL;
-  private final String USER;
-  private final String PASSWORD;
+  Dotenv dotenv = Dotenv.load();
+  private final String URL = dotenv.get("DB_URL");
+  private final String USER = dotenv.get("DB_USER");
+  private final String PASSWORD = dotenv.get("DB_PASSWORD");
 
-  public DBConnection() {
-    Dotenv dotenv = Dotenv.load();
-    URL = dotenv.get("DB_URL");
-    USER = dotenv.get("DB_USER");
-    PASSWORD = dotenv.get("DB_PASSWORD");
+  public DBConnection() {}
+
+  public String getURL() {
+    return URL;
+  }
+
+  public String getUSER() {
+    return USER;
+  }
+
+  public String getPASSWORD() {
+    return PASSWORD;
+  }
+
+  public Connection getConnection() throws SQLException {
+    return DriverManager.getConnection(URL, USER, PASSWORD);
   }
 }
