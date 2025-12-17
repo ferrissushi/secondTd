@@ -15,6 +15,10 @@ public class Ingredient {
     this.dish = dish;
   }
 
+  public String getDishName() {
+    return dish.getName();
+  }
+
   public int getId() {
     return id;
   }

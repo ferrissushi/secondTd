@@ -15,6 +15,14 @@ public class Dish {
     this.ingredients = ingredients;
   }
 
+  public Double getDishPrice() {
+    double price = 0;
+    for (Ingredient ingredient : ingredients) {
+      price += ingredient.getPrice();
+    }
+    return price;
+  }
+
   public int getId() {
     return id;
   }
