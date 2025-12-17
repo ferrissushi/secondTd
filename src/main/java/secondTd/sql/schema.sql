@@ -13,7 +13,7 @@ create table if not exists ingredient(
     name varchar not null,
     price numeric(10,2),
     category ingredient_category,
-    id_dish int
+    id_dish int,
     constraint ingredient_dish_fk
         foreign key (id_dish)
         references dish(id)

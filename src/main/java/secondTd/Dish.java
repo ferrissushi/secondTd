@@ -15,6 +15,9 @@ public class Dish {
     this.ingredients = ingredients;
   }
 
+
+  public Dish() {}
+
   public Double getDishPrice() {
     double price = 0;
     for (Ingredient ingredient : ingredients) {
