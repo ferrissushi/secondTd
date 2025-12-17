@@ -16,9 +16,9 @@ public class DataRetriever {
     List<Ingredient> ingredients = new ArrayList<>();
     String sql =
         """
-          select d.id, d.name, d.dish_type, c.id ingredient_id, i.name ingredient_name,
+          select d.id, d.name, d.dish_type, i.id ingredient_id, i.name ingredient_name,
           i.price ingredient_price, i.category ingredient_category from dish d
-          left join ingredient i on d.id = i.id_dish where d.id = ?;
+          left join ingredient i on d.id = i.id_dish where d.id = ? order by d.id asc;
         """;
     try (Connection connection = dbConnection.getConnection();
         PreparedStatement ps = connection.prepareStatement(sql); ) {
@@ -27,6 +27,7 @@ public class DataRetriever {
       while (rs.next()) {
         dish = mapToDish(rs);
         Ingredient ingredient = mapToIngredient(rs);
+        ingredient.setDish(dish);
         ingredients.add(ingredient);
       }
 
@@ -54,5 +55,34 @@ public class DataRetriever {
     dish.setDishType(DishTypeEnum.valueOf(rs.getString("dish_type")));
     dish.setIngredients(null);
     return dish;
+  }
+
+  public List<Ingredient> findIngredients(int page, int size) {
+    int offset = (page - 1) * size;
+    if (page < 1 || offset < 1) {
+      throw new IllegalArgumentException("Page and offset must be greater than 0");
+    }
+    List<Ingredient> ingredients = new ArrayList<>();
+    String sql = """
+      select i.id, i.name, i.price, i.category, d.id dish_id, d.name dish_name, d.dish_type dish_type
+      from ingredient i left join dish d on i.id_dish = d.id
+      order by i.id asc limit ? offset ?;
+    """;
+
+    try (Connection connection = dbConnection.getConnection();
+    PreparedStatement ps = connection.prepareStatement(sql)) {
+      ps.setInt(1, size);
+      ps.setInt(2, offset);
+      ResultSet rs = ps.executeQuery();
+      while (rs.next()) {
+        Dish dish = mapToDish(rs);
+        Ingredient ingredient = mapToIngredient(rs);
+        ingredient.setDish(dish);
+        ingredients.add(ingredient);
+      }
+      return ingredients;
+    } catch (SQLException e) {
+      throw new RuntimeException(e);
+    }
   }
 }
