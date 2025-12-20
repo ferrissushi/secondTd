@@ -76,4 +76,31 @@ public class DataRetriever {
         dish.setIngredients(ingredients);
         return dish;
     }
+
+    public List<Ingredient> findIngredients(int page, int size) {
+        if (page < 1 || size < 1) {
+            throw new IllegalArgumentException("Page and size should'nt be negative or 0");
+        }
+        int offset = size * (page - 1);
+        String sql = """
+                select id, name, price, category from ingredient order by id
+                limit ? offset ?;
+                """;
+        List<Ingredient> ingredients = new ArrayList<>();
+        try {
+            Connection connection = dbConnection.getConnection();
+            PreparedStatement ps = connection.prepareStatement(sql);
+            ps.setInt(1, size);
+            ps.setInt(2, offset);
+            ResultSet rs = ps.executeQuery();
+            while(rs.next()) {
+                Ingredient ingredient = mapToIngredient(rs);
+                ingredients.add(ingredient);
+            }
+            dbConnection.closeConnection(connection);
+            return ingredients;
+        } catch(SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
 }
