@@ -7,6 +7,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.CsvSources;
 import secondTd.db.DBConnection;
+import secondTd.model.Dish;
 import secondTd.model.Ingredient;
 
 import java.sql.Connection;
@@ -33,8 +34,17 @@ class DataRetrieverTest {
         dbConnection.closeConnection(connection);
     }
 
-    @Test
-    void findDishById() {
+    @ParameterizedTest
+    @CsvSource(value = {
+            "1, 1",
+            "2, 2",
+            "3, 3",
+            "4, 4",
+            "5, 5"
+    })
+    void should_return_dish_by_id_ok(Integer id, Integer expectedId) {
+        Dish dish = dataRetriever.findDishById(id);
+        assertEquals(expectedId, dish.getId());
     }
 
     @ParameterizedTest

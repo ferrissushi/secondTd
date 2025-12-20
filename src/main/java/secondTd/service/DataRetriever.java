@@ -22,7 +22,21 @@ public class DataRetriever {
         String sql = """
                 select id, name, dish_type from dish where id = ?;
                 """;
-        return null;
+        List<Ingredient> ingredients = findIngredientById(id);
+        Dish dish = null;
+        try {
+            Connection connection = dbConnection.getConnection();
+            PreparedStatement ps = connection.prepareStatement(sql);
+            ps.setInt(1, id);
+            ResultSet rs = ps.executeQuery();
+            while(rs.next()) {
+                dish = mapToDish(rs, ingredients);
+            }
+            dbConnection.closeConnection(connection);
+            return dish;
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public List<Ingredient> findIngredientById(Integer id) {
