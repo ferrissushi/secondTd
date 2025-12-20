@@ -28,4 +28,8 @@ public class DBConnection {
   public Connection getConnection() throws SQLException {
     return DriverManager.getConnection(URL, USER, PASSWORD);
   }
+
+  public void closeConnection(Connection connection) throws SQLException {
+    connection.close();
+  }
 }
