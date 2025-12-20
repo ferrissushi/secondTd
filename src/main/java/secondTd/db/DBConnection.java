@@ -35,4 +35,5 @@ public class DBConnection {
   public void closeConnection(Connection connection) throws SQLException {
     connection.close();
   }
+
 }

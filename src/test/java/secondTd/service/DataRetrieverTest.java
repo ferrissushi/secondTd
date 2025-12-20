@@ -18,20 +18,11 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class DataRetrieverTest {
 
-    private Connection connection;
     private DataRetriever dataRetriever;
-    private DBConnection dbConnection;
 
     @BeforeEach
     void setUp() throws SQLException {
         dataRetriever = new DataRetriever();
-        dbConnection = new DBConnection();
-        connection = dbConnection.getConnection();
-    }
-
-    @AfterEach
-    void cleanUp() throws SQLException {
-        dbConnection.closeConnection(connection);
     }
 
     @ParameterizedTest
@@ -52,5 +43,40 @@ class DataRetrieverTest {
     void should_find_ingredient_by_id_dish_ok(Integer idDish, Integer expectedValueLength) {
         List<Ingredient> ingredients = dataRetriever.findIngredientById(idDish);
         assertEquals(expectedValueLength, ingredients.size());
+    }
+
+    @Test
+    void findIngredients() {
+    }
+
+    @Test
+    void should_create_new_ingredient_ok() throws SQLException {
+        Dish dish = new Dish();
+        dish.setId(1);
+        Ingredient newIngredient = new Ingredient(7, "Potatoe", 1000.00, Ingredient.CategoryEnum.VEGETABLE, dish);
+        Ingredient newIngredient2 = new Ingredient(8, "Paprica", 100.00, Ingredient.CategoryEnum.OTHER, dish);
+        List<Ingredient> newIngredientList = List.of(newIngredient, newIngredient2);
+        List<Ingredient> newIngredientsInserted = dataRetriever.createIngredients(newIngredientList);
+        
+        assertEquals(newIngredientList, newIngredientsInserted);
+
+        dataRetriever.deleteIngredient(7);
+        dataRetriever.deleteIngredient(8);
+    }
+
+    @Test
+    void should_delete_ingredient_ok() throws SQLException {
+        Dish dish = new Dish();
+        dish.setId(1);
+        Ingredient newIngredient = new Ingredient(9, "Potatoe", 1000.00, Ingredient.CategoryEnum.VEGETABLE, dish);
+        dataRetriever.createIngredients(List.of(newIngredient));
+        List<Ingredient> ingredients = dataRetriever.findIngredients(1,10);
+        int sizeBefore = 6;
+        dataRetriever.deleteIngredient(9);
+        List<Ingredient> currentIngredients = dataRetriever.findIngredients(1,10);
+        int sizeAfter = 5;
+
+        assertEquals(sizeBefore, ingredients.size());
+        assertEquals(sizeAfter, currentIngredients.size());
     }
 }
