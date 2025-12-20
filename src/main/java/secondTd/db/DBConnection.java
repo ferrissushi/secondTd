@@ -26,7 +26,10 @@ public class DBConnection {
   }
 
   public Connection getConnection() throws SQLException {
-    return DriverManager.getConnection(URL, USER, PASSWORD);
+      if (URL == null || USER == null || PASSWORD == null) {
+        throw new IllegalArgumentException("Url, Username and password are mandatory");
+      }
+      return DriverManager.getConnection(URL, USER, PASSWORD);
   }
 
   public void closeConnection(Connection connection) throws SQLException {

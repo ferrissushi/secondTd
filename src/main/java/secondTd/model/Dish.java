@@ -69,6 +69,12 @@ public class Dish {
     }
 
     public void setIngredients(List<Ingredient> ingredients) {
+        if (ingredients == null) {
+            throw new IllegalArgumentException("Ingredient list cannot be null");
+        }
+        for (Ingredient ingredient: ingredients) {
+            ingredient.setDish(this);
+        }
         this.ingredients = ingredients;
     }
 
