@@ -1,14 +1,23 @@
 package secondTd.service;
 
+import secondTd.db.DBConnection;
 import secondTd.model.Dish;
 import secondTd.model.Ingredient;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
 public class DataRetriever {
+    private DBConnection dbConnection;
+
+    public DataRetriever() {
+        dbConnection = new DBConnection();
+    }
+
     public Dish findDishById(Integer id) {
         String sql = """
                 select id, name, dish_type from dish where id = ?;
@@ -21,7 +30,20 @@ public class DataRetriever {
                 select id, name, price, category, id_dish from ingredient where id_dish = ?;
                 """;
         List<Ingredient> ingredients = new ArrayList<>();
-        return List.of();
+        try {
+            Connection connection = dbConnection.getConnection();
+            PreparedStatement ps = connection.prepareStatement(sql);
+            ps.setInt(1, id);
+            ResultSet rs = ps.executeQuery();
+            while(rs.next()) {
+                Ingredient ingredient = mapToIngredient(rs);
+                ingredients.add(ingredient);
+            }
+            dbConnection.closeConnection(connection);
+            return ingredients;
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public Ingredient mapToIngredient(ResultSet rs) throws SQLException {
