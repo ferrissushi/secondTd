@@ -220,11 +220,12 @@ public class DataRetriever {
         }
     }
 
-    private List<Ingredient> findIngredientByName(String ingredientName) {
+    private FindIngredientByNameResult findIngredientByName(String ingredientName) {
         String sql = """
                 select id, name, price, category, id_dish from ingredient where name ilike ?;
                 """;
         List<Ingredient> ingredients = new ArrayList<>();
+        List<Integer> dishIds = new ArrayList<>();
         try {
             Connection connection = dbConnection.getConnection();
             PreparedStatement ps = connection.prepareStatement(sql);
@@ -233,18 +234,19 @@ public class DataRetriever {
             while (rs.next()) {
                 Ingredient ingredient = mapToIngredient(rs);
                 ingredients.add(ingredient);
+                Integer dishId = rs.getInt("id_dish");
+                dishIds.add(dishId);
             }
             dbConnection.closeConnection(connection);
-            return ingredients;
+            return new FindIngredientByNameResult(ingredients, dishIds);
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
     }
 
+    private record FindIngredientByNameResult(List<Ingredient> ingredients, List<Integer> dishIds) {}
+
     public List<Dish> findDishByIngredientName(String ingredientName) {
-        String sql = """
-                select d.id, d.name, d.dish_type, i.i
-                """;
         return List.of();
     }
 }
