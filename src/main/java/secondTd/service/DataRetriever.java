@@ -247,6 +247,26 @@ public class DataRetriever {
     private record FindIngredientByNameResult(List<Ingredient> ingredients, List<Integer> dishIds) {}
 
     public List<Dish> findDishByIngredientName(String ingredientName) {
-        return List.of();
+        String sql = """
+                select id, name, dish_type from dish where id = ?;
+                """;
+        List<Dish> dishes = new ArrayList<>();
+        FindIngredientByNameResult ingredientsAndDishId = findIngredientByName(ingredientName);
+        for (int i = 0; i < ingredientsAndDishId.ingredients().size(); i++) {
+            try {
+                Connection connection = dbConnection.getConnection();
+                PreparedStatement ps = connection.prepareStatement(sql);
+                ps.setInt(1, ingredientsAndDishId.dishIds().get(i));
+                ResultSet rs = ps.executeQuery();
+                while (rs.next()) {
+                    Dish dish = mapToDish(rs, List.of(ingredientsAndDishId.ingredients().get(i)));
+                    dishes.add(dish);
+                }
+                dbConnection.closeConnection(connection);
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
+            }
+        }
+        return dishes;
     }
 }
