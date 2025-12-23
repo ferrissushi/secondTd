@@ -220,4 +220,31 @@ public class DataRetriever {
         }
     }
 
+    private List<Ingredient> findIngredientByName(String ingredientName) {
+        String sql = """
+                select id, name, price, category, id_dish from ingredient where name ilike ?;
+                """;
+        List<Ingredient> ingredients = new ArrayList<>();
+        try {
+            Connection connection = dbConnection.getConnection();
+            PreparedStatement ps = connection.prepareStatement(sql);
+            ps.setString(1, "'%" + ingredientName + "%'");
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                Ingredient ingredient = mapToIngredient(rs);
+                ingredients.add(ingredient);
+            }
+            dbConnection.closeConnection(connection);
+            return ingredients;
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public List<Dish> findDishByIngredientName(String ingredientName) {
+        String sql = """
+                select d.id, d.name, d.dish_type, i.i
+                """;
+        return List.of();
+    }
 }
