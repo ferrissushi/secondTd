@@ -1,5 +1,8 @@
 package secondTd;
 
+import secondTd.model.Ingredient.CategoryEnum;
+import java.util.List;
+import secondTd.model.Ingredient;
 import secondTd.service.DataRetriever;
 
 public class App {
@@ -31,10 +34,32 @@ public class App {
         // System.out.println("---------------------");
         // System.out.println(retriever.findIngredients(3, 5));
 
-        System.out.println("Find dish by ingredients name (ingredient name = 'eur')");
+        // System.out.println("Find dish by ingredients name (ingredient name =
+        //
+        //
+        //
+        //
+        //
+        //
+        //
+        // 'eur')");
+        // System.out.println("---------------------");
+        // System.out.println(retriever.findDishByIngredientName("eur").toString());
+
+        System.out.println("Find Ingredient by criteria");
+
         System.out.println("---------------------");
-        System.out.println(retriever.findDishByIngredientName("eur").toString());
+
+        List<Ingredient> ingredients1 = retriever.findIngredientByCriteria("null", CategoryEnum.VEGETABLE, null, 1, 10);
+        List<Ingredient> ingredients2 = retriever.findIngredientByCriteria("cho", null, "Sal", 1, 10);
+        List<Ingredient> ingredients3 = retriever.findIngredientByCriteria("cho", null, "gateau", 1, 10);
+
+        System.out.println(ingredients1.toString());
+        // System.out.println("\n");
+        // System.out.println(ingredients2.toString());
+        // System.out.println("\n");
+        // System.out.println(ingredients3.toString());
 
     }
-}
 
+}

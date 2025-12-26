@@ -324,7 +324,7 @@ public class DataRetriever {
             conditionClauses.add("i.name ilike ?");
         }
         if (category != null) {
-            conditionClauses.add("category = ?");
+            conditionClauses.add("category = ?::ingredient_category");
         }
         if (dishName != null) {
             conditionClauses.add("d.name ilike ?");
