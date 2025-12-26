@@ -230,7 +230,7 @@ public class DataRetriever {
         try {
             Connection connection = dbConnection.getConnection();
             PreparedStatement ps = connection.prepareStatement(sql);
-            ps.setString(1, "'%" + ingredientName + "%'");
+            ps.setString(1, "%" + ingredientName + "%");
             ResultSet rs = ps.executeQuery();
             while (rs.next()) {
                 Ingredient ingredient = mapToIngredient(rs);
@@ -254,6 +254,7 @@ public class DataRetriever {
                 """;
         List<Dish> dishes = new ArrayList<>();
         FindIngredientByNameResult ingredientsAndDishId = findIngredientByName(ingredientName);
+        System.out.println(ingredientsAndDishId.ingredients());
         for (int i = 0; i < ingredientsAndDishId.ingredients().size(); i++) {
             try {
                 Connection connection = dbConnection.getConnection();
