@@ -109,12 +109,17 @@ public class DataRetriever {
         }
     }
 
-    public List<Ingredient> createIngredients(List<Ingredient> newIngredients) throws SQLException {
+    public List<Ingredient> createIngredients(List<Ingredient> newIngredients) {
         String sql = """
-                insert into ingredient (id, name, price, category, id_dish)
-                values (?, ?, ?, ?::ingredient_category, ?) returning id, name, price, category, id_dish;
+                insert into ingredient (id, name, price, category)
+                values (?, ?, ?, ?::ingredient_category) returning id, name, price, category, id_dish;
                 """;
-        Connection connection = dbConnection.getConnection();
+        Connection connection;
+        try {
+            connection = dbConnection.getConnection();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
         List<Ingredient> newIngredientsInserted = new ArrayList<>();
         try {
             connection.setAutoCommit(false);
@@ -128,7 +133,6 @@ public class DataRetriever {
                 ps.setString(2, newIngredient.getName());
                 ps.setDouble(3, newIngredient.getPrice());
                 ps.setString(4, newIngredient.getCategory().toString());
-                ps.setInt(5, newIngredient.getDish().getId());
                 ResultSet rs = ps.executeQuery();
                 while (rs.next()) {
                     Ingredient newIngredientInserted = mapToIngredient(rs);
@@ -138,10 +142,18 @@ public class DataRetriever {
             connection.commit();
             return newIngredientsInserted;
         } catch (SQLException e) {
-            connection.rollback();
+            try {
+                connection.rollback();
+            } catch (SQLException e1) {
+                throw new RuntimeException(e1);
+            }
             throw new RuntimeException(e);
         } finally {
-            dbConnection.closeConnection(connection);
+            try {
+                dbConnection.closeConnection(connection);
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
+            }
         }
     }
 
@@ -194,11 +206,7 @@ public class DataRetriever {
                 listOfNotFoundIngredient.add(ingredient);
             }
         }
-        try {
-            createIngredients(listOfNotFoundIngredient);
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
+        createIngredients(listOfNotFoundIngredient);
     }
 
     private Ingredient findIngredientById(int id) {
