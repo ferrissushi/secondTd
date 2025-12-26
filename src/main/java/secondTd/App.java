@@ -2,7 +2,10 @@ package secondTd;
 
 import secondTd.model.Ingredient.CategoryEnum;
 import java.util.List;
+
+import secondTd.model.Dish;
 import secondTd.model.Ingredient;
+import secondTd.model.Dish.DishTypeEnum;
 import secondTd.service.DataRetriever;
 
 public class App {
@@ -63,15 +66,62 @@ public class App {
         // System.out.println("\n");
         // System.out.println(ingredients3.toString());
 
-        List<Ingredient> newIngredients = retriever.createIngredients(List.of(
-                new Ingredient(8, "Fromage", 1200.00, CategoryEnum.DAIRY, null),
-                new Ingredient(9, "Oignon", 300.00, CategoryEnum.VEGETABLE, null)));
+        // List<Ingredient> newIngredients = retriever.createIngredients(List.of(
+        // new Ingredient(8, "Fromage", 1200.00, CategoryEnum.DAIRY, null),
+        // new Ingredient(9, "Oignon", 300.00, CategoryEnum.VEGETABLE, null)));
+        //
+        // System.out.println("New ingredients created: ");
+        // System.out.println(newIngredients.toString());
+        //
+        // retriever.deleteIngredient(8);
+        // retriever.deleteIngredient(9);
 
-        System.out.println("New ingredients created: ");
-        System.out.println(newIngredients.toString());
+        // List<Ingredient> newIngredients = retriever.createIngredients(List.of(
+        //         new Ingredient(10, "Carotte", 2000.00, CategoryEnum.VEGETABLE, null),
+        //         new Ingredient(11, "Laitue", 2000.00, CategoryEnum.VEGETABLE, null)));
+        //
+        // System.out.println("New ingredients created: ");
+        // System.out.println(newIngredients.toString());
+        // retriever.deleteIngredient(10);
+        // retriever.deleteIngredient(11);
+        //
 
-        retriever.deleteIngredient(8);
-        retriever.deleteIngredient(9);
+//        Dish dish = new Dish();
+//        dish.setId(10);
+//        dish.setName("Soupe de légumes");
+//        dish.setDishType(DishTypeEnum.START);
+//        dish.setIngredients(List.of(new Ingredient(8, "Oignon", 300.00, CategoryEnum.VEGETABLE, null)));
+//        Dish savedDish = retriever.saveDish(dish);
+//        System.out.println(savedDish.toString());
+//        retriever.deleteIngredient(8);
+
+
+        //Dish dish = new Dish();
+        //dish.setId(1);
+        //dish.setName("Salade fraiche");
+        //dish.setDishType(DishTypeEnum.START);
+        //dish.setIngredients(List.of(new Ingredient(8, "Oignon", 300.00, CategoryEnum.VEGETABLE, null),
+        //        new Ingredient(9, "Laitue", 800.00, CategoryEnum.VEGETABLE, new Dish(10, null, null, null)),
+        //        new Ingredient(10, "Tomate", 600.00, CategoryEnum.VEGETABLE, new Dish(10, null, null, null)),
+        //        new Ingredient(11, "Fromage", 1200.00, CategoryEnum.DAIRY, new Dish(10, null, null, null))
+        //));
+
+       // Dish savedDish = retriever.saveDish(dish);
+       // System.out.println(savedDish.toString());
+
+
+
+        Dish dish = new Dish();
+        dish.setId(1);
+        dish.setName("Salade de fromage");
+        dish.setDishType(DishTypeEnum.START);
+        dish.setIngredients(List.of(
+                new Ingredient(11, "Fromage", 1200.00, CategoryEnum.DAIRY, new Dish(1, null, null, null))
+        ));
+
+        Dish savedDish = retriever.saveDish(dish);
+        System.out.println(savedDish.toString());
+
     }
 
 }

@@ -39,7 +39,7 @@ class DataRetrieverTest {
     }
 
     @ParameterizedTest
-    @CsvSource(value = {  "1, 2", "2, 1 " })
+    @CsvSource(value = { "1, 2", "2, 1 " })
     void should_find_ingredient_by_id_dish_ok(Integer idDish, Integer expectedValueLength) {
         List<Ingredient> ingredients = dataRetriever.findIngredientsByDishId(idDish);
         assertEquals(expectedValueLength, ingredients.size());
@@ -70,10 +70,10 @@ class DataRetrieverTest {
         dish.setId(1);
         Ingredient newIngredient = new Ingredient(9, "Potatoe", 1000.00, Ingredient.CategoryEnum.VEGETABLE, dish);
         dataRetriever.createIngredients(List.of(newIngredient));
-        List<Ingredient> ingredients = dataRetriever.findIngredients(1,  10);
+        List<Ingredient> ingredients = dataRetriever.findIngredients(1, 0);
         int sizeBefore = 6;
         dataRetriever.deleteIngredient(9);
-        List<Ingredient> currentIngredients = dataRetriever.findIngredients(1,  10);
+        List<Ingredient> currentIngredients = dataRetriever.findIngredients(1, 0);
         int sizeAfter = 5;
 
         assertEquals(sizeBefore, ingredients.size());

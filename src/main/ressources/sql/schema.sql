@@ -10,7 +10,7 @@ create type ingredient_category as enum ('VEGETABLE', 'ANIMAL', 'MARINE', 'DAIRY
 
 create table if not exists ingredient(
     id serial primary key,
-    name varchar not null,
+    name varchar not null unique,
     price numeric(10,2),
     category ingredient_category,
     id_dish int,

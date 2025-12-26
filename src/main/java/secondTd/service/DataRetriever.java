@@ -6,6 +6,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+
 import secondTd.db.DBConnection;
 import secondTd.model.Dish;
 import secondTd.model.Ingredient;
@@ -22,7 +23,7 @@ public class DataRetriever {
                 select id, name, dish_type from dish where id = ?;
                 """;
         List<Ingredient> ingredients = findIngredientsByDishId(id);
-        Dish dish = null;
+        Dish dish;
         try {
             Connection connection = dbConnection.getConnection();
             PreparedStatement ps = connection.prepareStatement(sql);
@@ -61,26 +62,7 @@ public class DataRetriever {
         }
     }
 
-    public Ingredient mapToIngredient(ResultSet rs) throws SQLException {
-        Ingredient ingredient = new Ingredient();
-        Dish dish = new Dish();
-        ingredient.setId(rs.getInt("id"));
-        ingredient.setName(rs.getString("name"));
-        ingredient.setPrice(rs.getDouble("price"));
-        ingredient.setCategory(Ingredient.CategoryEnum.valueOf(rs.getString("category")));
-        dish.setId(rs.getInt("id_dish"));
-        ingredient.setDish(dish);
-        return ingredient;
-    }
 
-    public Dish mapToDish(ResultSet rs, List<Ingredient> ingredients) throws SQLException {
-        Dish dish = new Dish();
-        dish.setId(rs.getInt("id"));
-        dish.setName(rs.getString("name"));
-        dish.setDishType(Dish.DishTypeEnum.valueOf(rs.getString("dish_type")));
-        dish.setIngredients(ingredients);
-        return dish;
-    }
 
     public List<Ingredient> findIngredients(int page, int size) {
         if (page < 1 || size < 1) {
@@ -109,10 +91,11 @@ public class DataRetriever {
         }
     }
 
+
     public List<Ingredient> createIngredients(List<Ingredient> newIngredients) {
         String sql = """
-                insert into ingredient (id, name, price, category)
-                values (?, ?, ?, ?::ingredient_category) returning id, name, price, category, id_dish;
+                insert into ingredient (id, name, price, category, id_dish)
+                values (?, ?, ?, ?::ingredient_category, ?) returning id, name, price, category, id_dish;
                 """;
         Connection connection;
         try {
@@ -124,8 +107,8 @@ public class DataRetriever {
         try {
             connection.setAutoCommit(false);
             for (Ingredient newIngredient : newIngredients) {
-                Ingredient fethedIngredient = findIngredientById(newIngredient.getId());
-                if (fethedIngredient != null) {
+                Ingredient fetchedIngredient = findIngredientById(newIngredient.getId());
+                if (fetchedIngredient != null) {
                     throw new RuntimeException("Ingredient is already in the database");
                 }
                 PreparedStatement ps = connection.prepareStatement(sql);
@@ -133,6 +116,9 @@ public class DataRetriever {
                 ps.setString(2, newIngredient.getName());
                 ps.setDouble(3, newIngredient.getPrice());
                 ps.setString(4, newIngredient.getCategory().toString());
+                if (newIngredient.getDish() != null) {
+                    ps.setInt(5, newIngredient.getDish().getId());
+                }
                 ResultSet rs = ps.executeQuery();
                 while (rs.next()) {
                     Ingredient newIngredientInserted = mapToIngredient(rs);
@@ -175,8 +161,8 @@ public class DataRetriever {
     public Dish saveDish(Dish dishToSave) {
         String sql = """
                  insert into dish (id, name, dish_type)
-                 values (?, ?, ?) on conflict (id) do
-                 update set name = excluded.name, dish_type = excluded.dish_type
+                 values (?, ?, ?::dish_types) on conflict (id) do
+                 update set name = excluded.name, dish_type = excluded.dish_type::dish_types
                  returning id, name, dish_type;
                 """;
         Dish dish = new Dish();
@@ -248,6 +234,21 @@ public class DataRetriever {
             }
             dbConnection.closeConnection(connection);
             return new FindIngredientByNameResult(ingredients, dishIds);
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public void deleteDish(int i) {
+        String sql = """
+                delete from dish where id = ?;
+                """;
+        try {
+            Connection connection = dbConnection.getConnection();
+            PreparedStatement ps = connection.prepareStatement(sql);
+            ps.setInt(1, i);
+            ps.executeUpdate();
+            dbConnection.closeConnection(connection);
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
@@ -353,5 +354,25 @@ public class DataRetriever {
         }
 
         return sql.toString();
+    }
+    public Ingredient mapToIngredient(ResultSet rs) throws SQLException {
+        Ingredient ingredient = new Ingredient();
+        Dish dish = new Dish();
+        ingredient.setId(rs.getInt("id"));
+        ingredient.setName(rs.getString("name"));
+        ingredient.setPrice(rs.getDouble("price"));
+        ingredient.setCategory(Ingredient.CategoryEnum.valueOf(rs.getString("category")));
+        dish.setId(rs.getInt("id_dish"));
+        ingredient.setDish(dish);
+        return ingredient;
+    }
+
+    public Dish mapToDish(ResultSet rs, List<Ingredient> ingredients) throws SQLException {
+        Dish dish = new Dish();
+        dish.setId(rs.getInt("id"));
+        dish.setName(rs.getString("name"));
+        dish.setDishType(Dish.DishTypeEnum.valueOf(rs.getString("dish_type")));
+        dish.setIngredients(ingredients);
+        return dish;
     }
 }
