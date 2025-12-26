@@ -314,7 +314,7 @@ public class DataRetriever {
             int size) {
         StringBuilder sql = new StringBuilder(
                 """
-                        select i.id id, i.name name, i.category category, i.id_dish id_dish
+                        select i.id id, i.price price, i.name name, i.category category, i.id_dish id_dish
                         from dish d right join ingredient i on d.id = i.id_dish
                         """);
         List<String> conditionClauses = new ArrayList<>();
