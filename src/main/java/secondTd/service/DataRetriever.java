@@ -28,8 +28,10 @@ public class DataRetriever {
             PreparedStatement ps = connection.prepareStatement(sql);
             ps.setInt(1, id);
             ResultSet rs = ps.executeQuery();
-            while (rs.next()) {
+            if (rs.next()) {
                 dish = mapToDish(rs, ingredients);
+            } else {
+                throw new RuntimeException("Dish with id " + id + " not found");
             }
             dbConnection.closeConnection(connection);
             return dish;

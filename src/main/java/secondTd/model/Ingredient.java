@@ -74,15 +74,18 @@ public class Ingredient {
                 ", name='" + name + '\'' +
                 ", price=" + price +
                 ", category=" + category +
-                ", dish=" + dish +
                 '}';
     }
 
     @Override
     public boolean equals(Object o) {
-        if (o == null || getClass() != o.getClass()) return false;
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
         Ingredient that = (Ingredient) o;
-        return getId() == that.getId() && Objects.equals(getName(), that.getName()) && Objects.equals(getPrice(), that.getPrice()) && getCategory() == that.getCategory() && Objects.equals(getDish(), that.getDish());
+        return getId() == that.getId() && Objects.equals(getName(), that.getName())
+                && Objects.equals(getPrice(), that.getPrice()) && getCategory() == that.getCategory()
+                && Objects.equals(getDish(), that.getDish());
     }
 
     @Override
