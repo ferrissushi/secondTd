@@ -62,8 +62,6 @@ public class DataRetriever {
         }
     }
 
-
-
     public List<Ingredient> findIngredients(int page, int size) {
         if (page < 1 || size < 1) {
             throw new IllegalArgumentException("Page and size should'nt be negative or 0");

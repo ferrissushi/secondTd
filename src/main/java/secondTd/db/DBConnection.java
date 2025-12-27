@@ -32,8 +32,16 @@ public class DBConnection {
       return DriverManager.getConnection(URL, USER, PASSWORD);
   }
 
-  public void closeConnection(Connection connection) throws SQLException {
-    connection.close();
+  public void closeJDBCRessources(AutoCloseable... ressources) throws SQLException {
+    for (AutoCloseable ressource : ressources) {
+      if (ressource != null) {
+        try {
+          ressource.close();
+        } catch (Exception e) {
+          throw new SQLException("Error while closing resource: " + e.getMessage());
+        }
+      }
+    }
   }
 
 }
