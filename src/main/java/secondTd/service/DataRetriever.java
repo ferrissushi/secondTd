@@ -133,7 +133,6 @@ public class DataRetriever {
                 from dish
                 where id = ?;
                 """;
-
         List<Dish> dishes = new ArrayList<>();
         FindIngredientByNameResult result = findIngredientByName(ingredientName);
         Connection connection = null;
@@ -220,23 +219,17 @@ public class DataRetriever {
         }
     }
 
-
-
-
     public void deleteIngredient(Integer id) {
         String sql = "delete from ingredient where id = ?;";
         Connection connection = null;
         PreparedStatement ps = null;
-
         try {
             connection = dbConnection.getConnection();
             ps = connection.prepareStatement(sql);
             ps.setInt(1, id);
             ps.executeUpdate();
-
         } catch (SQLException e) {
             throw new RuntimeException(e);
-
         } finally {
             dbConnection.closeJDBCRessources(ps, connection);
         }
@@ -277,12 +270,10 @@ public class DataRetriever {
                 from ingredient
                 where id = ?;
                 """;
-
         Connection connection = null;
         PreparedStatement ps = null;
         ResultSet rs = null;
         Ingredient ingredient = null;
-
         try {
             connection = dbConnection.getConnection();
             ps = connection.prepareStatement(sql);
@@ -293,10 +284,8 @@ public class DataRetriever {
                 ingredient = mapToIngredient(rs);
             }
             return ingredient;
-
         } catch (SQLException e) {
             throw new RuntimeException(e);
-
         } finally {
             dbConnection.closeJDBCRessources(rs, ps, connection);
         }
@@ -344,8 +333,6 @@ public class DataRetriever {
     private record FindIngredientByNameResult(List<Ingredient> ingredients, List<Integer> dishIds) {
     }
 
-
-
     private String buildSql(
             String ingredientName,
             Ingredient.CategoryEnum category,
@@ -359,7 +346,6 @@ public class DataRetriever {
                         """);
         List<String> conditionClauses = new ArrayList<>();
         String orderByClauses = null;
-
         if (ingredientName != null) {
             conditionClauses.add("i.name ilike ?");
         }
@@ -369,23 +355,20 @@ public class DataRetriever {
         if (dishName != null) {
             conditionClauses.add("d.name ilike ?");
         }
-
         if (page > 0 && size > 0) {
             int offset = size * (page - 1);
             orderByClauses = "order by i.id limit " + size + " offset " + offset;
         }
-
         if (!conditionClauses.isEmpty()) {
             sql.append(" where ");
             sql.append(String.join(" and ", conditionClauses));
         }
-
         if (orderByClauses != null) {
             sql.append(" ").append(orderByClauses);
         }
-
         return sql.toString();
     }
+
     public Ingredient mapToIngredient(ResultSet rs) throws SQLException {
         Ingredient ingredient = new Ingredient();
         Dish dish = new Dish();
