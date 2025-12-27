@@ -9,6 +9,8 @@ import org.junit.jupiter.params.provider.CsvSources;
 import secondTd.db.DBConnection;
 import secondTd.model.Dish;
 import secondTd.model.Ingredient;
+import secondTd.model.Ingredient.CategoryEnum;
+import secondTd.service.utils.TestUtils;
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -23,61 +25,142 @@ class DataRetrieverTest {
     @BeforeEach
     void setUp() throws SQLException {
         dataRetriever = new DataRetriever();
+        TestUtils testUtils = new TestUtils();
+        testUtils.insertDatabaseTestData();
+    }
+
+    @Test
+    void should_find_dish_by_id_ok() {
+        Dish dish = dataRetriever.findDishById(1);
+        assertEquals("Salade fraiche", dish.getName());
+        assertEquals("Laitue", dish.getIngredients().get(0).getName());
+        assertEquals("Tomate", dish.getIngredients().get(1).getName());
+    }
+
+    @Test
+    void should_find_dish_by_id_ko() {
+        assertThrows(RuntimeException.class, () -> {
+            dataRetriever.findDishById(999);
+        });
+    }
+
+    @ParameterizedTest
+    @CsvSource(
+    value = {
+        "2,2,Poulet,Chocolat",
+        "3,5,null,null"
+    },
+    nullValues = {"null"})
+    void should_find_ingredients_with_pagination_ok(
+        int page,
+        int size,
+        String expectedFirstIngredientName,
+        String expectedSecondIngredientName) {
+        List<Ingredient> ingredients = dataRetriever.findIngredients(page, size);
+        assertEquals(expectedFirstIngredientName, ingredients.size() > 0 ? ingredients.get(0).getName() : null);
+        assertEquals(expectedSecondIngredientName, ingredients.size() > 1 ? ingredients.get(1).getName() : null);
+    }
+
+    @Test
+    void should_find_dish_by_ingredient_name_ok() {
+        List<Dish> dishes = dataRetriever.findDishByIngredientName("eur");
+        assertEquals("Gateau au chocolat", dishes.get(0).getName());
+    }
+
+    @ParameterizedTest
+    @CsvSource(
+    value = {
+        "null, VEGETABLE,null,1, 10,Laitue, Tomate",
+        "cho, null, Sal, 1, 10, null, null",
+        "cho, null, gateau, 1, 10, Chocolat, null"
+    },
+    nullValues = {"null"})
+    void should_find_ingredient_by_criteria_ok(
+        String name,
+        String category,
+        String dishName,
+        int page,
+        int size,
+        String expectedFirstIngredientName,
+        String expectedSecondIngredientName) {
+        List<Ingredient> ingredients = dataRetriever.findIngredientByCriteria(
+            name,
+            category != null ? Ingredient.CategoryEnum.valueOf(category) : null,
+            dishName,
+            page,
+            size);
+        assertEquals(expectedFirstIngredientName, ingredients.size() > 0 ? ingredients.get(0).getName() : null);
+        assertEquals(expectedSecondIngredientName, ingredients.size() > 1 ? ingredients.get(1).getName() : null);
+    }
+
+    @Test
+    void should_create_ingredient_ok() {
+        Ingredient ingredient1 = new Ingredient();
+        ingredient1.setId(6);
+        ingredient1.setName("Fromage");
+        ingredient1.setPrice(1200.00);
+        ingredient1.setCategory(CategoryEnum.DAIRY);
+        Ingredient ingredient2 = new Ingredient();
+        ingredient2.setId(7);
+        ingredient2.setName("Oignon");
+        ingredient2.setPrice(500.00);
+        ingredient2.setCategory(CategoryEnum.VEGETABLE);
+        List<Ingredient> ingredientsInserted = dataRetriever.createIngredients(
+            List.of(
+                ingredient1, ingredient2
+            )
+        );
+        assertEquals(2, ingredientsInserted.size());
+    }
+
+    @Test
+    void should_create_ingredient_ko() {
+        Ingredient ingredient1 = new Ingredient();
+        ingredient1.setId(6);
+        ingredient1.setName("Carotte");
+        ingredient1.setPrice(2000.00);
+        ingredient1.setCategory(CategoryEnum.VEGETABLE);
+        Ingredient ingredient2 = new Ingredient();
+        ingredient2.setId(7);
+        ingredient2.setName("Laitue");
+        ingredient2.setPrice(2000.00);
+        ingredient2.setCategory(CategoryEnum.VEGETABLE);
+        assertThrows(RuntimeException.class, () -> {
+            dataRetriever.createIngredients(
+                List.of(
+                    ingredient1, ingredient2
+                )
+            );
+        });
     }
 
     @ParameterizedTest
     @CsvSource(value = {
-            "1, 1",
-            "2, 2",
-            "3, 3",
-            "4, 4",
-            "5, 5"
+        "7, Oignon, 500.00, VEGETABLE, 10, Soupe de legumes, START, Soupe de legumes",
+        "7, Oignon, 500.00, VEGETABLE, 1, Salade fraiche, START, Salade fraiche",
+        "8, Fromage, 2000.00, DAIRY, 1, Salade de fromage, START, Salade de fromage"
     })
-    void should_return_dish_by_id_ok(Integer id, Integer expectedId) {
-        Dish dish = dataRetriever.findDishById(id);
-        assertEquals(expectedId, dish.getId());
-    }
-
-    @ParameterizedTest
-    @CsvSource(value = { "1, 2", "2, 1 " })
-    void should_find_ingredient_by_id_dish_ok(Integer idDish, Integer expectedValueLength) {
-        List<Ingredient> ingredients = dataRetriever.findIngredientsByDishId(idDish);
-        assertEquals(expectedValueLength, ingredients.size());
-    }
-
-    @Test
-    void findIngredients() {
-    }
-
-    @Test
-    void should_create_new_ingredient_ok() throws SQLException {
+    void should_save_dish_ok(
+        int ingredientId,
+        String ingredientName,
+        Double ingredientPrice,
+        CategoryEnum ingredientCategory,
+        int dishId,
+        String dishName,
+        Dish.DishTypeEnum dishType,
+        String expectedDishName
+    ) {
+        Ingredient ingredient1 = new Ingredient();
+        ingredient1.setId(ingredientId);
+        ingredient1.setName(ingredientName);
+        ingredient1.setPrice(ingredientPrice);
+        ingredient1.setCategory(ingredientCategory);
         Dish dish = new Dish();
-        dish.setId(1);
-        Ingredient newIngredient = new Ingredient(7, "Potatoe", 1000.00, Ingredient.CategoryEnum.VEGETABLE, dish);
-        Ingredient newIngredient2 = new Ingredient(8, "Paprica", 100.00, Ingredient.CategoryEnum.OTHER, dish);
-        List<Ingredient> newIngredientList = List.of(newIngredient, newIngredient2);
-        List<Ingredient> newIngredientsInserted = dataRetriever.createIngredients(newIngredientList);
-
-        assertEquals(newIngredientList, newIngredientsInserted);
-
-        dataRetriever.deleteIngredient(7);
-        dataRetriever.deleteIngredient(8);
+        dish.setId(dishId);
+        dish.setName(dishName);
+        dish.setDishType(dishType);
+        dish.setIngredients(List.of(ingredient1));
+        Dish dishInserted = dataRetriever.saveDish(dish);
+        assertEquals(expectedDishName, dishInserted.getName());
     }
-
-    @Test
-    void should_delete_ingredient_ok() throws SQLException {
-        Dish dish = new Dish();
-        dish.setId(1);
-        Ingredient newIngredient = new Ingredient(9, "Potatoe", 1000.00, Ingredient.CategoryEnum.VEGETABLE, dish);
-        dataRetriever.createIngredients(List.of(newIngredient));
-        List<Ingredient> ingredients = dataRetriever.findIngredients(1, 0);
-        int sizeBefore = 6;
-        dataRetriever.deleteIngredient(9);
-        List<Ingredient> currentIngredients = dataRetriever.findIngredients(1, 0);
-        int sizeAfter = 5;
-
-        assertEquals(sizeBefore, ingredients.size());
-        assertEquals(sizeAfter, currentIngredients.size());
-    }
-
 }
