@@ -198,8 +198,26 @@ public class DataRetriever {
                 dish = mapToDish(rs, dishToSave.getIngredients());
             }
             dbConnection.closeJDBCRessources(connection, rs, ps);
+            dissociateIngredientsFromDish(dish.getId());
             checkAndInsertIngredients(dishToSave.getIngredients());
             return dish;
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private void dissociateIngredientsFromDish(int dishId) {
+        String sql = """
+                update ingredient
+                set id_dish = null
+                where id_dish = ?;
+                """;
+        try {
+            Connection connection = dbConnection.getConnection();
+            PreparedStatement ps = connection.prepareStatement(sql);
+            ps.setInt(1, dishId);
+            ps.executeUpdate();
+            dbConnection.closeJDBCRessources(connection, ps);
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
