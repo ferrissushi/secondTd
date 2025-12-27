@@ -46,31 +46,6 @@ public class DataRetriever {
         }
     }
 
-    public List<Ingredient> findIngredientsByDishId(Integer id) {
-        String sql = """
-                select id, name, price, category, id_dish from ingredient where id_dish = ?;
-                """;
-        List<Ingredient> ingredients = new ArrayList<>();
-        Connection connection = null;
-        PreparedStatement ps = null;
-        ResultSet rs = null;
-        try {
-            connection = dbConnection.getConnection();
-            ps = connection.prepareStatement(sql);
-            ps.setInt(1, id);
-            rs = ps.executeQuery();
-            while (rs.next()) {
-                Ingredient ingredient = mapToIngredient(rs);
-                ingredients.add(ingredient);
-            }
-            return ingredients;
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        } finally {
-            dbConnection.closeJDBCRessources(connection, ps, rs);
-        }
-    }
-
     public List<Ingredient> findIngredients(int page, int size) {
         if (page < 1 || size < 1) {
             throw new IllegalArgumentException("Page and size shouldn't be negative or 0");
@@ -108,7 +83,6 @@ public class DataRetriever {
             dbConnection.closeJDBCRessources(rs, ps, connection);
         }
     }
-
 
     public List<Ingredient> createIngredients(List<Ingredient> newIngredients) {
         String sql = """
@@ -160,25 +134,6 @@ public class DataRetriever {
         }
     }
 
-    public void deleteIngredient(Integer id) {
-        String sql = "delete from ingredient where id = ?;";
-        Connection connection = null;
-        PreparedStatement ps = null;
-
-        try {
-            connection = dbConnection.getConnection();
-            ps = connection.prepareStatement(sql);
-            ps.setInt(1, id);
-            ps.executeUpdate();
-
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-
-        } finally {
-            dbConnection.closeJDBCRessources(ps, connection);
-        }
-    }
-
     public Dish saveDish(Dish dishToSave) {
         String sql = """
                  insert into dish (id, name, dish_type)
@@ -205,6 +160,126 @@ public class DataRetriever {
             throw new RuntimeException(e);
         }
     }
+
+    public List<Dish> findDishByIngredientName(String ingredientName) {
+        String sql = """
+                select id, name, dish_type
+                from dish
+                where id = ?;
+                """;
+
+        List<Dish> dishes = new ArrayList<>();
+        FindIngredientByNameResult result = findIngredientByName(ingredientName);
+
+        for (int i = 0; i < result.ingredients().size(); i++) {
+            Connection connection = null;
+            PreparedStatement ps = null;
+            ResultSet rs = null;
+
+            try {
+                connection = dbConnection.getConnection();
+                ps = connection.prepareStatement(sql);
+                ps.setInt(1, result.dishIds().get(i));
+                rs = ps.executeQuery();
+
+                if (rs.next()) {
+                    dishes.add(mapToDish(rs, List.of(result.ingredients().get(i))));
+                }
+
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
+
+            } finally {
+                dbConnection.closeJDBCRessources(rs, ps, connection);
+            }
+        }
+        return dishes;
+    }
+
+    public List<Ingredient> findIngredientByCriteria(
+            String ingredientName,
+            Ingredient.CategoryEnum category,
+            String dishName,
+            int page,
+            int size) {
+        String sql = buildSql(ingredientName, category, dishName, page, size);
+        Connection connection = null;
+        PreparedStatement ps = null;
+        ResultSet rs = null;
+        try {
+            connection = dbConnection.getConnection();
+            ps = connection.prepareStatement(sql);
+            int paramIndex = 1;
+            if (ingredientName != null) {
+                ps.setString(paramIndex++, "%" + ingredientName + "%");
+            }
+            if (category != null) {
+                ps.setString(paramIndex++, category.toString());
+            }
+            if (dishName != null) {
+                ps.setString(paramIndex++, "%" + dishName + "%");
+            }
+            rs = ps.executeQuery();
+            List<Ingredient> ingredients = new ArrayList<>();
+            while (rs.next()) {
+                Ingredient ingredient = mapToIngredient(rs);
+                ingredients.add(ingredient);
+            }
+            return ingredients;
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        } finally {
+            dbConnection.closeJDBCRessources(connection, ps, rs);
+        }
+    }
+
+    public List<Ingredient> findIngredientsByDishId(Integer id) {
+        String sql = """
+                select id, name, price, category, id_dish from ingredient where id_dish = ?;
+                """;
+        List<Ingredient> ingredients = new ArrayList<>();
+        Connection connection = null;
+        PreparedStatement ps = null;
+        ResultSet rs = null;
+        try {
+            connection = dbConnection.getConnection();
+            ps = connection.prepareStatement(sql);
+            ps.setInt(1, id);
+            rs = ps.executeQuery();
+            while (rs.next()) {
+                Ingredient ingredient = mapToIngredient(rs);
+                ingredients.add(ingredient);
+            }
+            return ingredients;
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        } finally {
+            dbConnection.closeJDBCRessources(connection, ps, rs);
+        }
+    }
+
+
+
+
+    public void deleteIngredient(Integer id) {
+        String sql = "delete from ingredient where id = ?;";
+        Connection connection = null;
+        PreparedStatement ps = null;
+
+        try {
+            connection = dbConnection.getConnection();
+            ps = connection.prepareStatement(sql);
+            ps.setInt(1, id);
+            ps.executeUpdate();
+
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+
+        } finally {
+            dbConnection.closeJDBCRessources(ps, connection);
+        }
+    }
+
 
     private void dissociateIngredientsFromDish(int dishId) {
         String sql = """
@@ -307,77 +382,7 @@ public class DataRetriever {
     private record FindIngredientByNameResult(List<Ingredient> ingredients, List<Integer> dishIds) {
     }
 
-    public List<Dish> findDishByIngredientName(String ingredientName) {
-        String sql = """
-                select id, name, dish_type
-                from dish
-                where id = ?;
-                """;
 
-        List<Dish> dishes = new ArrayList<>();
-        FindIngredientByNameResult result = findIngredientByName(ingredientName);
-
-        for (int i = 0; i < result.ingredients().size(); i++) {
-            Connection connection = null;
-            PreparedStatement ps = null;
-            ResultSet rs = null;
-
-            try {
-                connection = dbConnection.getConnection();
-                ps = connection.prepareStatement(sql);
-                ps.setInt(1, result.dishIds().get(i));
-                rs = ps.executeQuery();
-
-                if (rs.next()) {
-                    dishes.add(mapToDish(rs, List.of(result.ingredients().get(i))));
-                }
-
-            } catch (SQLException e) {
-                throw new RuntimeException(e);
-
-            } finally {
-                dbConnection.closeJDBCRessources(rs, ps, connection);
-            }
-        }
-        return dishes;
-    }
-
-    public List<Ingredient> findIngredientByCriteria(
-            String ingredientName,
-            Ingredient.CategoryEnum category,
-            String dishName,
-            int page,
-            int size) {
-        String sql = buildSql(ingredientName, category, dishName, page, size);
-        Connection connection = null;
-        PreparedStatement ps = null;
-        ResultSet rs = null;
-        try {
-            connection = dbConnection.getConnection();
-            ps = connection.prepareStatement(sql);
-            int paramIndex = 1;
-            if (ingredientName != null) {
-                ps.setString(paramIndex++, "%" + ingredientName + "%");
-            }
-            if (category != null) {
-                ps.setString(paramIndex++, category.toString());
-            }
-            if (dishName != null) {
-                ps.setString(paramIndex++, "%" + dishName + "%");
-            }
-            rs = ps.executeQuery();
-            List<Ingredient> ingredients = new ArrayList<>();
-            while (rs.next()) {
-                Ingredient ingredient = mapToIngredient(rs);
-                ingredients.add(ingredient);
-            }
-            return ingredients;
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        } finally {
-            dbConnection.closeJDBCRessources(connection, ps, rs);
-        }
-    }
 
     private String buildSql(
             String ingredientName,
