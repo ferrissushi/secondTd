@@ -4,9 +4,14 @@ import java.util.List;
 import java.util.Objects;
 
 public class Dish {
+    public enum DishTypeEnum {
+        START, MAIN, DESSERT
+    }
     private int id;
     private String name;
     private DishTypeEnum dishType;
+    private Integer price;
+
     private List<Ingredient> ingredients;
 
     public Dish(int id, String name, DishTypeEnum dishType, List<Ingredient> ingredients) {
@@ -16,9 +21,25 @@ public class Dish {
         this.ingredients = ingredients;
     }
 
+    public Dish(int id, String name, DishTypeEnum dishType, List<Ingredient> ingredients, int price) {
+        this.id = id;
+        this.name = name;
+        this.dishType = dishType;
+        this.ingredients = ingredients;
+        this.price = price;
+    }
+
     public Dish() {
     }
 
+    public int getPrice() {
+        return price;
+    }
+
+
+    public void setPrice(Integer price) {
+        this.price = price;
+    }
 
     @Override
     public boolean equals(Object o) {
@@ -44,7 +65,7 @@ public class Dish {
                 '}';
     }
 
-    public Double getDishPrice(){
+    public Double getDishCost() {
         return ingredients.stream().mapToDouble(Ingredient::getPrice).sum();
     }
 
@@ -72,7 +93,7 @@ public class Dish {
         if (ingredients == null) {
             throw new IllegalArgumentException("Ingredient list cannot be null");
         }
-        for (Ingredient ingredient: ingredients) {
+        for (Ingredient ingredient : ingredients) {
             ingredient.setDish(this);
         }
         this.ingredients = ingredients;
@@ -86,7 +107,10 @@ public class Dish {
         this.dishType = dishType;
     }
 
-    public enum DishTypeEnum {
-        START, MAIN, DESSERT
+    public Double getGrossMargin() {
+        if (this.price == null) {
+            throw new RuntimeException("Dish does not have a price yet");
+        }
+        return this.price - getDishCost();
     }
 }

@@ -76,15 +76,15 @@ public class App {
         // retriever.deleteIngredient(8);
         // retriever.deleteIngredient(9);
 
-        List<Ingredient> newIngredients = retriever.createIngredients(List.of(
-                new Ingredient(10, "Carotte", 2000.00, CategoryEnum.VEGETABLE, null),
-                new Ingredient(11, "Laitue", 2000.00, CategoryEnum.VEGETABLE, null)));
-
-        System.out.println("New ingredients created: ");
-        System.out.println(newIngredients.toString());
-        retriever.deleteIngredient(10);
-        retriever.deleteIngredient(11);
-
+        // List<Ingredient> newIngredients = retriever.createIngredients(List.of(
+        //         new Ingredient(10, "Carotte", 2000.00, CategoryEnum.VEGETABLE, null),
+        //         new Ingredient(11, "Laitue", 2000.00, CategoryEnum.VEGETABLE, null)));
+        //
+        // System.out.println("New ingredients created: ");
+        // System.out.println(newIngredients.toString());
+        // retriever.deleteIngredient(10);
+        // retriever.deleteIngredient(11);
+        //
 
 //        Dish dish = new Dish();
 //        dish.setId(10);
@@ -121,6 +121,31 @@ public class App {
         //
         // Dish savedDish = retriever.saveDish(dish);
         // System.out.println(savedDish.toString());
+        //
+
+
+
+
+        // Dish dish = retriever.findDishById(3);
+        // System.out.println(dish.getPrice());
+        // System.out.println(dish.getGrossMargin());
+        //
+        // Dish dish1 = retriever.findDishById(1);
+        // System.out.println(dish1.getGrossMargin());
+
+        // Dish dish2 = retriever.findDishById(2);
+        // dish2.setPrice(100);
+        // Dish savedDish2 = retriever.saveDish(dish2);
+        // System.out.println(savedDish2.getGrossMargin());
+
+        Dish dish3 = new Dish();
+        dish3.setId(6);
+        dish3.setName("Sandwich");
+        dish3.setDishType(DishTypeEnum.START);
+        dish3.setIngredients(List.of(new Ingredient(8, "Oignon", 300.00, CategoryEnum.VEGETABLE, null)));
+        dish3.setPrice(4000);
+        Dish savedDish3 = retriever.saveDish(dish3);
+        System.out.println(savedDish3.getGrossMargin());
 
     }
 

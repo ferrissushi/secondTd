@@ -46,16 +46,16 @@ class DataRetrieverTest {
 
     @ParameterizedTest
     @CsvSource(
-    value = {
-        "2,2,Poulet,Chocolat",
-        "3,5,null,null"
-    },
-    nullValues = {"null"})
+            value = {
+                    "2,2,Poulet,Chocolat",
+                    "3,5,null,null"
+            },
+            nullValues = {"null"})
     void should_find_ingredients_with_pagination_ok(
-        int page,
-        int size,
-        String expectedFirstIngredientName,
-        String expectedSecondIngredientName) {
+            int page,
+            int size,
+            String expectedFirstIngredientName,
+            String expectedSecondIngredientName) {
         List<Ingredient> ingredients = dataRetriever.findIngredients(page, size);
         assertEquals(expectedFirstIngredientName, ingredients.size() > 0 ? ingredients.get(0).getName() : null);
         assertEquals(expectedSecondIngredientName, ingredients.size() > 1 ? ingredients.get(1).getName() : null);
@@ -69,26 +69,26 @@ class DataRetrieverTest {
 
     @ParameterizedTest
     @CsvSource(
-    value = {
-        "null, VEGETABLE,null,1, 10,Laitue, Tomate",
-        "cho, null, Sal, 1, 10, null, null",
-        "cho, null, gateau, 1, 10, Chocolat, null"
-    },
-    nullValues = {"null"})
+            value = {
+                    "null, VEGETABLE,null,1, 10,Laitue, Tomate",
+                    "cho, null, Sal, 1, 10, null, null",
+                    "cho, null, gateau, 1, 10, Chocolat, null"
+            },
+            nullValues = {"null"})
     void should_find_ingredient_by_criteria_ok(
-        String name,
-        String category,
-        String dishName,
-        int page,
-        int size,
-        String expectedFirstIngredientName,
-        String expectedSecondIngredientName) {
+            String name,
+            String category,
+            String dishName,
+            int page,
+            int size,
+            String expectedFirstIngredientName,
+            String expectedSecondIngredientName) {
         List<Ingredient> ingredients = dataRetriever.findIngredientByCriteria(
-            name,
-            category != null ? Ingredient.CategoryEnum.valueOf(category) : null,
-            dishName,
-            page,
-            size);
+                name,
+                category != null ? Ingredient.CategoryEnum.valueOf(category) : null,
+                dishName,
+                page,
+                size);
         assertEquals(expectedFirstIngredientName, ingredients.size() > 0 ? ingredients.get(0).getName() : null);
         assertEquals(expectedSecondIngredientName, ingredients.size() > 1 ? ingredients.get(1).getName() : null);
     }
@@ -106,9 +106,9 @@ class DataRetrieverTest {
         ingredient2.setPrice(500.00);
         ingredient2.setCategory(CategoryEnum.VEGETABLE);
         List<Ingredient> ingredientsInserted = dataRetriever.createIngredients(
-            List.of(
-                ingredient1, ingredient2
-            )
+                List.of(
+                        ingredient1, ingredient2
+                )
         );
         assertEquals(2, ingredientsInserted.size());
     }
@@ -127,28 +127,28 @@ class DataRetrieverTest {
         ingredient2.setCategory(CategoryEnum.VEGETABLE);
         assertThrows(RuntimeException.class, () -> {
             dataRetriever.createIngredients(
-                List.of(
-                    ingredient1, ingredient2
-                )
+                    List.of(
+                            ingredient1, ingredient2
+                    )
             );
         });
     }
 
     @ParameterizedTest
     @CsvSource(value = {
-        "7, Oignon, 500.00, VEGETABLE, 10, Soupe de legumes, START, Soupe de legumes",
-        "7, Oignon, 500.00, VEGETABLE, 1, Salade fraiche, START, Salade fraiche",
-        "8, Fromage, 2000.00, DAIRY, 1, Salade de fromage, START, Salade de fromage"
+            "7, Oignon, 500.00, VEGETABLE, 10, Soupe de legumes, START, Soupe de legumes",
+            "7, Oignon, 500.00, VEGETABLE, 1, Salade fraiche, START, Salade fraiche",
+            "8, Fromage, 2000.00, DAIRY, 1, Salade de fromage, START, Salade de fromage"
     })
     void should_save_dish_ok(
-        int ingredientId,
-        String ingredientName,
-        Double ingredientPrice,
-        CategoryEnum ingredientCategory,
-        int dishId,
-        String dishName,
-        Dish.DishTypeEnum dishType,
-        String expectedDishName
+            int ingredientId,
+            String ingredientName,
+            Double ingredientPrice,
+            CategoryEnum ingredientCategory,
+            int dishId,
+            String dishName,
+            Dish.DishTypeEnum dishType,
+            String expectedDishName
     ) {
         Ingredient ingredient1 = new Ingredient();
         ingredient1.setId(ingredientId);
