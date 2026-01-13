@@ -32,7 +32,7 @@ public class Dish {
     public Dish() {
     }
 
-    public int getPrice() {
+    public Integer getPrice() {
         return price;
     }
 

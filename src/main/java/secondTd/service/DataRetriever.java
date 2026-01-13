@@ -73,7 +73,11 @@ public class DataRetriever {
             ps.setInt(1, dishToSave.getId());
             ps.setString(2, dishToSave.getName());
             ps.setString(3, dishToSave.getDishType().toString());
-            ps.setInt(4, dishToSave.getPrice());
+            if (dishToSave.getPrice() != null) {
+                ps.setInt(4, dishToSave.getPrice());
+            } else {
+                ps.setNull(4, Types.INTEGER);
+            }
             ResultSet rs = ps.executeQuery();
             while (rs.next()) {
                 dish = mapToDish(rs, dishToSave.getIngredients());

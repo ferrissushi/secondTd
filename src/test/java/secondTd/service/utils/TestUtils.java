@@ -1,6 +1,7 @@
 package secondTd.service.utils;
 
 import java.sql.Connection;
+import java.sql.Statement;
 
 import secondTd.db.DBConnection;
 
@@ -32,7 +33,7 @@ public class TestUtils {
         try {
             DBConnection dbConnection = new DBConnection();
             Connection connection = dbConnection.getConnection();
-            var statement = connection.createStatement();
+            Statement statement = connection.createStatement();
             statement.execute(sql);
             dbConnection.closeJDBCRessources(statement, connection);
         } catch (Exception e) {
