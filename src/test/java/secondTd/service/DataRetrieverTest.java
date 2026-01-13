@@ -132,10 +132,10 @@ class DataRetrieverTest {
 
     @ParameterizedTest
     @CsvSource(value = {
-            "7, Oignon, 500.00, VEGETABLE, 10, Soupe de legumes, START, Soupe de legumes",
-            "7, Oignon, 500.00, VEGETABLE, 1, Salade fraiche, START, Salade fraiche",
-            "8, Fromage, 2000.00, DAIRY, 1, Salade de fromage, START, Salade de fromage"
-    })
+            "7, Oignon, 500.00, VEGETABLE, 10, Soupe de legumes, START, Soupe de legumes, 1000",
+            "7, Oignon, 500.00, VEGETABLE, 1, Salade fraiche, START, Salade fraiche, 1000",
+            "8, Fromage, 2000.00, DAIRY, 1, Salade de fromage, START, Salade de fromage, null"
+    }, nullValues = {"null"})
     void should_save_dish_ok(
             int ingredientId,
             String ingredientName,
@@ -144,7 +144,8 @@ class DataRetrieverTest {
             int dishId,
             String dishName,
             Dish.DishTypeEnum dishType,
-            String expectedDishName
+            String expectedDishName,
+            Integer dishPrice
     ) {
         Ingredient ingredient1 = new Ingredient();
         ingredient1.setId(ingredientId);
@@ -156,6 +157,7 @@ class DataRetrieverTest {
         dish.setName(dishName);
         dish.setDishType(dishType);
         dish.setIngredients(List.of(ingredient1));
+        dish.setPrice(dishPrice);
         Dish dishInserted = dataRetriever.saveDish(dish);
         assertEquals(expectedDishName, dishInserted.getName());
     }

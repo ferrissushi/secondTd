@@ -266,7 +266,7 @@ public class DataRetriever {
 
     private void updateIngredientFromDish(List<Ingredient> ingredients, Dish dish) {
         String sql = """
-                insert ingredient (id, name, price, category, id_dish)
+                insert into ingredient (id, name, price, category, id_dish)
                 values (?, ?, ?, ?::ingredient_category, ?) on conflict (id) do nothing;
                 """;
         try {
