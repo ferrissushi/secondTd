@@ -1,18 +1,14 @@
 package secondTd.service;
 
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
-import org.junit.jupiter.params.provider.CsvSources;
-import secondTd.db.DBConnection;
 import secondTd.model.Dish;
 import secondTd.model.Ingredient;
 import secondTd.model.Ingredient.CategoryEnum;
 import secondTd.service.utils.TestUtils;
 
-import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.List;
 

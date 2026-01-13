@@ -137,15 +137,15 @@ public class App {
         // dish2.setPrice(100);
         // Dish savedDish2 = retriever.saveDish(dish2);
         // System.out.println(savedDish2.getGrossMargin());
-
-        Dish dish3 = new Dish();
-        dish3.setId(6);
-        dish3.setName("Sandwich");
-        dish3.setDishType(DishTypeEnum.START);
-        dish3.setIngredients(List.of(new Ingredient(8, "Oignon", 300.00, CategoryEnum.VEGETABLE, null)));
-        dish3.setPrice(4000);
-        Dish savedDish3 = retriever.saveDish(dish3);
-        System.out.println(savedDish3.getGrossMargin());
+        //
+        // Dish dish3 = new Dish();
+        // dish3.setId(6);
+        // dish3.setName("Sandwich");
+        // dish3.setDishType(DishTypeEnum.START);
+        // dish3.setIngredients(List.of(new Ingredient(8, "Oignon", 300.00, CategoryEnum.VEGETABLE, null)));
+        // dish3.setPrice(4000);
+        // Dish savedDish3 = retriever.saveDish(dish3);
+        // System.out.println(savedDish3.getGrossMargin());
 
     }
 
