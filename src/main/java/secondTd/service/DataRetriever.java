@@ -20,6 +20,9 @@ public class DataRetriever {
     }
 
     public Dish findDishById(Integer id) {
+        if (id == null) {
+            throw new IllegalArgumentException("Dish id cannot be null");
+        }
         String sql = """
                 select id, name, dish_type, price from dish where id = ?;
                 """;
