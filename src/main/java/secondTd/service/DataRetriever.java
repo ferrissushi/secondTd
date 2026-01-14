@@ -320,14 +320,13 @@ public class DataRetriever {
                 """;
 
         try {
+            PreparedStatement ps = connection.prepareStatement(sql);
             for (Ingredient ingredient: ingredients) {
-                PreparedStatement ps = connection.prepareStatement(sql);
-
                 setPreparedStatementForIngredient(ps, ingredient);
-                ps.executeUpdate();
-
-                dbConnection.closeJDBCRessources(ps);
+                ps.addBatch();
             }
+            ps.executeBatch();
+            dbConnection.closeJDBCRessources(ps);
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
