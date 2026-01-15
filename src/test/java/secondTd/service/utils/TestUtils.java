@@ -10,6 +10,7 @@ public class TestUtils {
 
     public void insertDatabaseTestData() {
         String sql = """
+                    delete from dish_ingredient;
                     delete from ingredient;
                     delete from dish;
                     insert into dish(id, name, dish_type, selling_price) values

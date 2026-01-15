@@ -1,5 +1,6 @@
 package secondTd.service;
 
+import java.math.BigDecimal;
 import java.sql.*;
 import secondTd.model.*;
 import secondTd.db.DBConnection;
@@ -19,7 +20,7 @@ public class DataRetriever {
             throw new IllegalArgumentException("Dish id cannot be null");
         }
         String sql = """
-                select id, name, dish_type, price from dish where id = ?;
+                select id, name, dish_type, selling_price from dish where id = ?;
                 """;
         Dish dish;
         Connection connection = null;
@@ -312,8 +313,9 @@ private void updateSequenceNextValue(Connection conn, String tableName, String c
     public List<Ingredient> findIngredientsByDishId(Integer id,
         Connection connection) {
         String sql = """
-                select id, name, price, category, id_dish
-                from ingredient where id_dish = ?;
+                select ingredient.id id, ingredient.name name, ingredient.price price, ingredient.category category,
+                dish_ingredient.quantity_required quantity_required, dish_ingredient.unit unit
+                from ingredient join dish_ingredient on ingredient.id = dish_ingredient.id_ingredient where dish_ingredient.id_dish = ?;
                 """;
         List<Ingredient> ingredients = new ArrayList<>();
         PreparedStatement ps = null;
@@ -478,14 +480,13 @@ private void updateSequenceNextValue(Connection conn, String tableName, String c
 
     public Ingredient mapToIngredient(ResultSet rs) throws SQLException {
         Ingredient ingredient = new Ingredient();
-        Dish dish = new Dish();
 
         ingredient.setId(rs.getInt("id"));
         ingredient.setName(rs.getString("name"));
         ingredient.setPrice(rs.getDouble("price"));
         ingredient.setCategory(Ingredient.CategoryEnum.valueOf(rs.getString("category")));
-        dish.setId(rs.getInt("id_dish"));
-        ingredient.setDish(dish);
+        ingredient.setQuantityRequired(rs.getDouble("quantity_required"));
+        ingredient.setUnit(Ingredient.UnitType.valueOf(rs.getString("unit")));
 
         return ingredient;
     }
@@ -500,7 +501,7 @@ private void updateSequenceNextValue(Connection conn, String tableName, String c
         dish.setDishType(Dish.DishTypeEnum.valueOf(rs.getString("dish_type")));
         dish.setIngredients(ingredients);
 
-        Double price = rs.getObject("price", Double.class);
+        Double price = rs.getObject("selling_price", BigDecimal.class).doubleValue();
         dish.setPrice(price);
 
         return dish;
