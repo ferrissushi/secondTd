@@ -10,7 +10,7 @@ public class Dish {
     private Integer id;
     private String name;
     private DishTypeEnum dishType;
-    private Integer price;
+    private Double sellingPrice;
 
     private List<Ingredient> ingredients;
 
@@ -21,24 +21,24 @@ public class Dish {
         this.ingredients = ingredients;
     }
 
-    public Dish(Integer id, String name, DishTypeEnum dishType, List<Ingredient> ingredients, int price) {
+    public Dish(Integer id, String name, DishTypeEnum dishType, List<Ingredient> ingredients, Double sellingPrice) {
         this.id = id;
         this.name = name;
         this.dishType = dishType;
         this.ingredients = ingredients;
-        this.price = price;
+        this.sellingPrice = sellingPrice;
     }
 
     public Dish() {
     }
 
-    public Integer getPrice() {
-        return price;
+    public Double getPrice() {
+        return sellingPrice;
     }
 
 
-    public void setPrice(Integer price) {
-        this.price = price;
+    public void setPrice(Double sellingPrice) {
+        this.sellingPrice = sellingPrice;
     }
 
     @Override
@@ -108,9 +108,9 @@ public class Dish {
     }
 
     public Double getGrossMargin() {
-        if (this.price == null) {
-            throw new RuntimeException("Dish does not have a price yet");
+        if (this.sellingPrice == null) {
+            throw new RuntimeException("Dish does not have a sellingPrice yet");
         }
-        return this.price - getDishCost();
+        return this.sellingPrice - getDishCost();
     }
 }

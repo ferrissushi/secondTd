@@ -1,6 +1,7 @@
 package secondTd.service;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
@@ -145,7 +146,7 @@ class DataRetrieverTest {
             String dishName,
             Dish.DishTypeEnum dishType,
             String expectedDishName,
-            Integer dishPrice
+            Double dishPrice
     ) {
         Ingredient ingredient1 = new Ingredient();
         ingredient1.setId(ingredientId);

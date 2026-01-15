@@ -78,7 +78,7 @@ public class DataRetriever {
             ps.setString(2, dishToSave.getName());
             ps.setString(3, dishToSave.getDishType().toString());
             if (dishToSave.getPrice() != null) {
-                ps.setInt(4, dishToSave.getPrice());
+                ps.setDouble(4, dishToSave.getPrice());
             } else {
                 ps.setNull(4, Types.INTEGER);
             }
@@ -500,7 +500,7 @@ private void updateSequenceNextValue(Connection conn, String tableName, String c
         dish.setDishType(Dish.DishTypeEnum.valueOf(rs.getString("dish_type")));
         dish.setIngredients(ingredients);
 
-        Integer price = rs.getObject("price", Integer.class);
+        Double price = rs.getObject("price", Double.class);
         dish.setPrice(price);
 
         return dish;
@@ -556,7 +556,7 @@ private void updateSequenceNextValue(Connection conn, String tableName, String c
             for (Ingredient ingredient : ingredients) {
                 ps.setInt(1, dishId);
                 ps.setInt(2, ingredient.getId());
-                ps.addBatch(); // Can be substitute ps.executeUpdate() but bad performance
+                ps.addBatch();
             }
             ps.executeBatch();
         }
