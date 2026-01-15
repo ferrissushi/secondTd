@@ -7,21 +7,21 @@ public class Dish {
     public enum DishTypeEnum {
         START, MAIN, DESSERT
     }
-    private int id;
+    private Integer id;
     private String name;
     private DishTypeEnum dishType;
     private Integer price;
 
     private List<Ingredient> ingredients;
 
-    public Dish(int id, String name, DishTypeEnum dishType, List<Ingredient> ingredients) {
+    public Dish(Integer id, String name, DishTypeEnum dishType, List<Ingredient> ingredients) {
         this.id = id;
         this.name = name;
         this.dishType = dishType;
         this.ingredients = ingredients;
     }
 
-    public Dish(int id, String name, DishTypeEnum dishType, List<Ingredient> ingredients, int price) {
+    public Dish(Integer id, String name, DishTypeEnum dishType, List<Ingredient> ingredients, int price) {
         this.id = id;
         this.name = name;
         this.dishType = dishType;
@@ -73,7 +73,7 @@ public class Dish {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(Integer id) {
         this.id = id;
     }
 
