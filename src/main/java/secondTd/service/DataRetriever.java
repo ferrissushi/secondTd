@@ -149,7 +149,7 @@ private void updateSequenceNextValue(Connection conn, String tableName, String c
 
     public List<Dish> findDishByIngredientName(String ingredientName) {
         String sql = """
-                select id, name, dish_type, price
+                select id, name, dish_type, selling_price
                 from dish
                 where id = ?;
                 """;
@@ -385,7 +385,10 @@ private void updateSequenceNextValue(Connection conn, String tableName, String c
 
     private FindIngredientByNameResult findIngredientByName(String ingredientName, Connection connection) {
         String sql = """
-                select id, name, price, category, id_dish from ingredient where name ilike ?;
+                select ingredient.id, name, price, category, quantity_required, unit, dish_ingredient.id_dish
+                from ingredient join dish_ingredient
+                on ingredient.id = dish_ingredient.id_ingredient
+                where ingredient.name ilike ?;
                 """;
         List<Ingredient> ingredients = new ArrayList<>();
         List<Integer> dishIds = new ArrayList<>();
@@ -442,9 +445,18 @@ private void updateSequenceNextValue(Connection conn, String tableName, String c
             int size) {
         StringBuilder sql = new StringBuilder(
                 """
-    SELECT i.id id, i.price price, i.name name, i.category category, i.id_dish id_dish
-    FROM dish d RIGHT JOIN ingredient i ON d.id = i.id_dish
-                        """);
+            select i.id id,
+            i.name name,
+            i.price price,
+            i.category category,
+            di.quantity_required quantity_required,
+            d.name dish_name,
+            di.unit unit
+            from ingredient i
+            join dish_ingredient di on i.id = di.id_ingredient
+            join dish d on di.id_dish = d.id
+            """);
+
         List<String> conditionClauses = new ArrayList<>();
 
         if (ingredientName != null) {
