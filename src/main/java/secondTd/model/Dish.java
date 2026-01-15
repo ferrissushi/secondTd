@@ -69,7 +69,7 @@ public class Dish {
         return ingredients.stream().mapToDouble(Ingredient::getPrice).sum();
     }
 
-    public int getId() {
+    public Integer getId() {
         return id;
     }
 
