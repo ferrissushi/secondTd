@@ -153,6 +153,8 @@ class DataRetrieverTest {
         ingredient1.setName(ingredientName);
         ingredient1.setPrice(ingredientPrice);
         ingredient1.setCategory(ingredientCategory);
+        ingredient1.setQuantityRequired(2.50);
+        ingredient1.setUnit(Ingredient.UnitType.KG);
         Dish dish = new Dish();
         dish.setId(dishId);
         dish.setName(dishName);

@@ -60,12 +60,12 @@ public class DataRetriever {
 
     public Dish saveDish(Dish dishToSave) {
         String sql = """
-                 insert into dish (id, name, dish_type, price)
+                 insert into dish (id, name, dish_type, selling_price)
                  values (?, ?, ?::dish_types, ?) on conflict (id) do
                  update set name = excluded.name,
                  dish_type = excluded.dish_type::dish_types,
-                 price = excluded.price
-                 returning id, name, dish_type, price;
+                 selling_price = excluded.selling_price
+                 returning id, name, dish_type, selling_price;
                 """;
         Dish dish = new Dish();
         try {
@@ -242,9 +242,9 @@ private void updateSequenceNextValue(Connection conn, String tableName, String c
     public List<Ingredient> unhandledCreateIngredients(
         List<Ingredient> newIngredients) throws SQLException {
         String sql = """
-                insert into ingredient (id, name, price, category, id_dish)
-                values (?, ?, ?, ?::ingredient_category, ?)
-                returning id, name, price, category, id_dish;
+                insert into ingredient (id, name, price, category)
+                values (?, ?, ?, ?::ingredient_category)
+                returning id, name, price, category;
                 """;
         Connection connection = dbConnection.getConnection();
         List<Ingredient> newIngredientsInserted = new ArrayList<>();
@@ -288,7 +288,7 @@ private void updateSequenceNextValue(Connection conn, String tableName, String c
         ResultSet rs = ps.executeQuery();
 
         while (rs.next()) {
-            Ingredient newIngredientInserted = mapToIngredient(rs);
+            Ingredient newIngredientInserted = mapToIngredientWithoutDish(rs);
             newIngredientsInserted.add(newIngredientInserted);
         }
 
@@ -301,12 +301,6 @@ private void updateSequenceNextValue(Connection conn, String tableName, String c
         ps.setString(2, newIngredient.getName());
         ps.setDouble(3, newIngredient.getPrice());
         ps.setString(4, newIngredient.getCategory().toString());
-
-        if (newIngredient.getDish() != null) {
-            ps.setInt(5, newIngredient.getDish().getId());
-        } else {
-            ps.setNull(5, Types.INTEGER);
-        }
     }
 
 
@@ -490,6 +484,17 @@ private void updateSequenceNextValue(Connection conn, String tableName, String c
         return sql.toString();
     }
 
+    public Ingredient mapToIngredientWithoutDish(ResultSet rs) throws SQLException {
+        Ingredient ingredient = new Ingredient();
+
+        ingredient.setId(rs.getInt("id"));
+        ingredient.setName(rs.getString("name"));
+        ingredient.setPrice(rs.getDouble("price"));
+        ingredient.setCategory(Ingredient.CategoryEnum.valueOf(rs.getString("category")));
+
+        return ingredient;
+    }
+
     public Ingredient mapToIngredient(ResultSet rs) throws SQLException {
         Ingredient ingredient = new Ingredient();
 
@@ -512,8 +517,10 @@ private void updateSequenceNextValue(Connection conn, String tableName, String c
         dish.setName(rs.getString("name"));
         dish.setDishType(Dish.DishTypeEnum.valueOf(rs.getString("dish_type")));
         dish.setIngredients(ingredients);
-
-        Double price = rs.getObject("selling_price", BigDecimal.class).doubleValue();
+        Double price = null;
+        if (rs.getObject("selling_price") != null) {
+            price = rs.getObject("selling_price", BigDecimal.class).doubleValue();
+        }
         dish.setPrice(price);
 
         return dish;
@@ -523,17 +530,15 @@ private void updateSequenceNextValue(Connection conn, String tableName, String c
             throws SQLException {
         if (ingredients == null || ingredients.isEmpty()) {
             try (PreparedStatement ps = conn.prepareStatement(
-                    "UPDATE ingredient SET id_dish = NULL WHERE id_dish = ?")) {
+                    "DELETE FROM dish_ingredient WHERE id_dish = ?")) {
                 ps.setInt(1, dishId);
                 ps.executeUpdate();
             }
             return;
         }
-
         String baseSql = """
-                    UPDATE ingredient
-                    SET id_dish = NULL
-                    WHERE id_dish = ? AND id NOT IN (%s)
+                    DELETE FROM dish_ingredient
+                    WHERE id_dish = ? AND id_ingredient NOT IN (%s)
                 """;
 
         String inClause = ingredients.stream()
@@ -559,18 +564,32 @@ private void updateSequenceNextValue(Connection conn, String tableName, String c
             return;
         }
 
-        String attachSql = """
-                    UPDATE ingredient
-                    SET id_dish = ?
-                    WHERE id = ?
+        String ingredientsInsertClause = """
+                    INSERT INTO ingredient (id, name, price, category)
+                    VALUES (?, ?, ?, ?::ingredient_category)
                 """;
 
-        try (PreparedStatement ps = conn.prepareStatement(attachSql)) {
+        String attachSql = """
+                    INSERT INTO dish_ingredient (id_dish, id_ingredient, quantity_required, unit)
+                    VALUES (?, ?, ?, ?::unit_type)
+                """;
+
+        try (PreparedStatement ps = conn.prepareStatement(attachSql);
+        PreparedStatement psIngredients = conn.prepareStatement(ingredientsInsertClause)
+        ) {
             for (Ingredient ingredient : ingredients) {
+                psIngredients.setInt(1, ingredient.getId());
+                psIngredients.setString(2, ingredient.getName());
+                psIngredients.setDouble(3, ingredient.getPrice());
+                psIngredients.setString(4, ingredient.getCategory().toString());
+                psIngredients.addBatch();
                 ps.setInt(1, dishId);
                 ps.setInt(2, ingredient.getId());
+                ps.setDouble(3, ingredient.getQuantityRequired());
+                ps.setString(4, ingredient.getUnit().toString());
                 ps.addBatch();
             }
+            psIngredients.executeBatch();
             ps.executeBatch();
         }
     }

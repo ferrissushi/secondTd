@@ -37,6 +37,7 @@ public class TestUtils {
 
                     select setval(pg_get_serial_sequence('dish', 'id'), (select max(id) from dish));
                     select setval(pg_get_serial_sequence('ingredient', 'id'), (select max(id) from ingredient));
+                    select setval(pg_get_serial_sequence('dish_ingredient', 'id'), (select max(id) from dish_ingredient));
                 """;
         try {
             DBConnection dbConnection = new DBConnection();
