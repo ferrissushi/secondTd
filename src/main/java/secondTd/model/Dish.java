@@ -66,7 +66,7 @@ public class Dish {
     }
 
     public Double getDishCost() {
-        return ingredients.stream().mapToDouble(Ingredient::getPrice).sum();
+        return ingredients.stream().mapToDouble(Ingredient::getTotalPrice).sum();
     }
 
     public Integer getId() {

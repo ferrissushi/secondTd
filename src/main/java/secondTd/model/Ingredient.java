@@ -94,6 +94,10 @@ public class Ingredient {
         return price;
     }
 
+    public Double getTotalPrice() {
+        return quantityRequired * price;
+    }
+
     public void setPrice(Double price) {
         this.price = price;
     }
