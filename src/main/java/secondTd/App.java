@@ -148,7 +148,7 @@ public class App {
         // System.out.println(savedDish3.getGrossMargin());
 
         Dish dish = retriever.findDishById(5);
-        Double dishCost = dish.getDishCost();
+        Double dishCost = dish.getGrossMargin();
         System.out.println(dishCost);
     }
 
