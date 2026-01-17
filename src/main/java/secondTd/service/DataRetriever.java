@@ -309,7 +309,7 @@ private void updateSequenceNextValue(Connection conn, String tableName, String c
         String sql = """
                 select ingredient.id id, ingredient.name name, ingredient.price price, ingredient.category category,
                 dish_ingredient.quantity_required quantity_required, dish_ingredient.unit unit
-                from ingredient join dish_ingredient on ingredient.id = dish_ingredient.id_ingredient where dish_ingredient.id_dish = ?;
+                from ingredient inner join dish_ingredient on ingredient.id = dish_ingredient.id_ingredient where dish_ingredient.id_dish = ?;
                 """;
         List<Ingredient> ingredients = new ArrayList<>();
         PreparedStatement ps = null;
@@ -380,7 +380,7 @@ private void updateSequenceNextValue(Connection conn, String tableName, String c
     private FindIngredientByNameResult findIngredientByName(String ingredientName, Connection connection) {
         String sql = """
                 select ingredient.id, name, price, category, quantity_required, unit, dish_ingredient.id_dish
-                from ingredient join dish_ingredient
+                from ingredient inner join dish_ingredient
                 on ingredient.id = dish_ingredient.id_ingredient
                 where ingredient.name ilike ?;
                 """;
@@ -447,8 +447,8 @@ private void updateSequenceNextValue(Connection conn, String tableName, String c
             d.name dish_name,
             di.unit unit
             from ingredient i
-            join dish_ingredient di on i.id = di.id_ingredient
-            join dish d on di.id_dish = d.id
+            inner join dish_ingredient di on i.id = di.id_ingredient
+            inner join dish d on di.id_dish = d.id
             """);
 
         List<String> conditionClauses = new ArrayList<>();
