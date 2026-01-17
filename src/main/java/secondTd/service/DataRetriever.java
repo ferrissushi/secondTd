@@ -2,8 +2,10 @@ package secondTd.service;
 
 import java.math.BigDecimal;
 import java.sql.*;
+
 import secondTd.model.*;
 import secondTd.db.DBConnection;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -118,7 +120,7 @@ public class DataRetriever {
         }
     }
 
-private void updateSequenceNextValue(Connection conn, String tableName, String columnName, String sequenceName) throws SQLException {
+    private void updateSequenceNextValue(Connection conn, String tableName, String columnName, String sequenceName) throws SQLException {
         String setValSql = String.format(
                 "SELECT setval('%s', (SELECT COALESCE(MAX(%s), 0) FROM %s))",
                 sequenceName, columnName, tableName
@@ -167,7 +169,7 @@ private void updateSequenceNextValue(Connection conn, String tableName, String c
 
                 if (rs.next()) {
                     dishes.add(mapToDish(rs,
-                        List.of(result.ingredients().get(i))));
+                            List.of(result.ingredients().get(i))));
                 }
             }
             return dishes;
@@ -217,8 +219,8 @@ private void updateSequenceNextValue(Connection conn, String tableName, String c
 
     public Dish findDishPriceById(Integer id) {
         String sql = """
-            select id, price from dish where id = ?;
-        """;
+                    select id, price from dish where id = ?;
+                """;
         Connection connection = null;
         PreparedStatement ps = null;
         ResultSet rs = null;
@@ -237,10 +239,12 @@ private void updateSequenceNextValue(Connection conn, String tableName, String c
         } finally {
             dbConnection.closeJDBCRessources(connection, ps, rs);
         }
-    };
+    }
+
+    ;
 
     public List<Ingredient> unhandledCreateIngredients(
-        List<Ingredient> newIngredients) throws SQLException {
+            List<Ingredient> newIngredients) throws SQLException {
         String sql = """
                 insert into ingredient (id, name, price, category)
                 values (?, ?, ?, ?::ingredient_category)
@@ -254,9 +258,9 @@ private void updateSequenceNextValue(Connection conn, String tableName, String c
 
             for (Ingredient newIngredient : newIngredients) {
                 prepareAndPushIngredientToList(newIngredient,
-                    newIngredientsInserted,
-                    connection,
-                    sql);
+                        newIngredientsInserted,
+                        connection,
+                        sql);
             }
 
             connection.commit();
@@ -271,13 +275,13 @@ private void updateSequenceNextValue(Connection conn, String tableName, String c
     }
 
     private void prepareAndPushIngredientToList(Ingredient newIngredient,
-        List<Ingredient> newIngredientsInserted,
-        Connection connection,
-        String sql) throws SQLException {
+                                                List<Ingredient> newIngredientsInserted,
+                                                Connection connection,
+                                                String sql) throws SQLException {
 
         List<Ingredient> fetchedIngredient =
                 findIngredientByName(newIngredient.getName(), connection).
-                ingredients();
+                        ingredients();
         if (!fetchedIngredient.isEmpty()) {
             throw new RuntimeException("Ingredient is already in the database");
         }
@@ -296,7 +300,7 @@ private void updateSequenceNextValue(Connection conn, String tableName, String c
     }
 
     private void setPreparedStatementForIngredient(PreparedStatement ps,
-        Ingredient newIngredient) throws SQLException {
+                                                   Ingredient newIngredient) throws SQLException {
         ps.setInt(1, newIngredient.getId());
         ps.setString(2, newIngredient.getName());
         ps.setDouble(3, newIngredient.getPrice());
@@ -305,7 +309,7 @@ private void updateSequenceNextValue(Connection conn, String tableName, String c
 
 
     public List<Ingredient> findIngredientsByDishId(Integer id,
-        Connection connection) {
+                                                    Connection connection) {
         String sql = """
                 select ingredient.id id, ingredient.name name, ingredient.price price, ingredient.category category,
                 dish_ingredient.quantity_required quantity_required, dish_ingredient.unit unit
@@ -356,8 +360,8 @@ private void updateSequenceNextValue(Connection conn, String tableName, String c
 
 
     private void updateIngredientFromDish(List<Ingredient> ingredients,
-        Dish dish,
-        Connection connection) {
+                                          Dish dish,
+                                          Connection connection) {
         String sql = """
                 insert into ingredient (id, name, price, category, id_dish)
                 values (?, ?, ?, ?::ingredient_category, ?) on conflict (id)
@@ -366,7 +370,7 @@ private void updateSequenceNextValue(Connection conn, String tableName, String c
 
         try {
             PreparedStatement ps = connection.prepareStatement(sql);
-            for (Ingredient ingredient: ingredients) {
+            for (Ingredient ingredient : ingredients) {
                 setPreparedStatementForIngredient(ps, ingredient);
                 ps.addBatch();
             }
@@ -428,8 +432,9 @@ private void updateSequenceNextValue(Connection conn, String tableName, String c
     }
 
     private record FindIngredientByNameResult(
-        List<Ingredient> ingredients,
-        List<Integer> dishIds) {}
+            List<Ingredient> ingredients,
+            List<Integer> dishIds) {
+    }
 
     private String buildSql(
             String ingredientName,
@@ -439,17 +444,17 @@ private void updateSequenceNextValue(Connection conn, String tableName, String c
             int size) {
         StringBuilder sql = new StringBuilder(
                 """
-            select i.id id,
-            i.name name,
-            i.price price,
-            i.category category,
-            di.quantity_required quantity_required,
-            d.name dish_name,
-            di.unit unit
-            from ingredient i
-            inner join dish_ingredient di on i.id = di.id_ingredient
-            inner join dish d on di.id_dish = d.id
-            """);
+                        select i.id id,
+                        i.name name,
+                        i.price price,
+                        i.category category,
+                        di.quantity_required quantity_required,
+                        d.name dish_name,
+                        di.unit unit
+                        from ingredient i
+                        inner join dish_ingredient di on i.id = di.id_ingredient
+                        inner join dish d on di.id_dish = d.id
+                        """);
 
         List<String> conditionClauses = new ArrayList<>();
 
@@ -509,7 +514,7 @@ private void updateSequenceNextValue(Connection conn, String tableName, String c
     }
 
     public Dish mapToDish(ResultSet rs,
-        List<Ingredient> ingredients) throws SQLException {
+                          List<Ingredient> ingredients) throws SQLException {
 
         Dish dish = new Dish();
 
@@ -575,7 +580,7 @@ private void updateSequenceNextValue(Connection conn, String tableName, String c
                 """;
 
         try (PreparedStatement ps = conn.prepareStatement(attachSql);
-        PreparedStatement psIngredients = conn.prepareStatement(ingredientsInsertClause)
+             PreparedStatement psIngredients = conn.prepareStatement(ingredientsInsertClause)
         ) {
             for (Ingredient ingredient : ingredients) {
                 psIngredients.setInt(1, ingredient.getId());
