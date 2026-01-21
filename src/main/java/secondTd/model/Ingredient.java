@@ -1,22 +1,41 @@
 package secondTd.model;
 
+import java.time.Instant;
+import java.util.List;
 import java.util.Objects;
 
 public class Ingredient {
+    @Override
+    public boolean equals(Object o) {
+        if (o == null || getClass() != o.getClass()) return false;
+        Ingredient that = (Ingredient) o;
+        return id == that.id && Objects.equals(name, that.name)
+                && Objects.equals(price, that.price)
+                && category == that.category
+                && Objects.equals(stockMovementList, that.stockMovementList);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, name, price, category, stockMovementList);
+    }
+
     public enum CategoryEnum {
         VEGETABLE, ANIMAL, MARINE, DAIRY, OTHER
     }
+
     private int id;
     private String name;
     private Double price;
     private CategoryEnum category;
+    private List<StockMovement> stockMovementList;
 
 
     public Ingredient(Integer id,
-        String name,
-        Double price,
-        CategoryEnum category,
-        Dish dish) {
+                      String name,
+                      Double price,
+                      CategoryEnum category,
+                      Dish dish) {
 
         this.id = id;
         this.name = name;
@@ -25,11 +44,11 @@ public class Ingredient {
     }
 
     public Ingredient(Integer id,
-        String name,
-        Double price,
-        CategoryEnum category,
-        Dish dish,
-        Double quantityRequired){
+                      String name,
+                      Double price,
+                      CategoryEnum category,
+                      Dish dish,
+                      Double quantityRequired) {
 
         this.id = id;
         this.name = name;
@@ -39,9 +58,6 @@ public class Ingredient {
 
     public Ingredient() {
     }
-
-
-
 
 
     public int getId() {
@@ -87,36 +103,32 @@ public class Ingredient {
                 '}';
     }
 
+    public List<StockMovement> getStockMovementList() {
+        return stockMovementList;
+    }
 
-    @Override
-    public int hashCode() {
-        return Objects.hash(getId(), getName(), getPrice(), getCategory());
+    public void setStockMovementList(List<StockMovement> stockMovementList) {
+        this.stockMovementList = stockMovementList;
+    }
+
+    public StockValue getStockValueAt(Instant t) {
+        StockMovement stockRelatedToInstantT = null;
+        for (StockMovement stockMovement: this.stockMovementList) {
+            if (stockMovement.getCreationDatetime().isBefore(t)) {
+                if (stockRelatedToInstantT == null) {
+                    stockRelatedToInstantT = stockMovement;
+                } else {
+                    if (stockRelatedToInstantT.getCreationDatetime().isBefore(stockMovement.getCreationDatetime())) {
+                        stockRelatedToInstantT = stockMovement;
+                    }
+                }
+            }
+        }
+        if (stockRelatedToInstantT == null) {
+            throw new IllegalArgumentException("Cannot get stock value of empty stock");
+        }
+        return stockRelatedToInstantT.getValue();
     }
 
 
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj)
-            return true;
-        if (obj == null)
-            return false;
-        if (getClass() != obj.getClass())
-            return false;
-        Ingredient other = (Ingredient) obj;
-        if (id != other.id)
-            return false;
-        if (name == null) {
-            if (other.name != null)
-                return false;
-        } else if (!name.equals(other.name))
-            return false;
-        if (price == null) {
-            if (other.price != null)
-                return false;
-        } else if (!price.equals(other.price))
-            return false;
-        if (category != other.category)
-            return false;
-        return true;
-    }
 }
