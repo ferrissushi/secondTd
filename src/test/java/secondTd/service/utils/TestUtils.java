@@ -10,6 +10,7 @@ public class TestUtils {
 
     public void insertDatabaseTestData() {
         String sql = """
+                    delete from stock_movement;
                     delete from dish_ingredient;
                     delete from ingredient;
                     delete from dish;
@@ -35,9 +36,22 @@ public class TestUtils {
                         (4, 4, 4, 0.30, 'KG'::unit_type),
                         (5, 4, 5, 0.20, 'KG'::unit_type);
 
+                    insert into stock_movement values
+                        (1, 1, 5.0, 'IN', 'KG', '2024-01-05 08:00'),
+                        (2, 1, 0.2, 'OUT', 'KG', '2024-01-06 12:00'),
+                        (3, 2, 4.0, 'IN', 'KG', '2024-01-05 08:00'),
+                        (4, 2, 0.15, 'OUT', 'KG', '2024-01-06 12:00'),
+                        (5, 3, 10.00, 'IN', 'KG', '2024-01-04 09:00'),
+                        (6, 3, 1.0, 'OUT', 'KG', '2024-01-06 13:00'),
+                        (7, 4, 3.0, 'IN', 'KG', '2024-01-05 10:00'),
+                        (8, 4, 0.3, 'OUT', 'KG', '2024-01-06 14:00'),
+                        (9, 5, 2.5, 'IN', 'KG', '2024-01-05 10:00'),
+                        (10, 5, 0.2, 'OUT', 'KG', '2024-01-06 14:00');
+                        
                     select setval(pg_get_serial_sequence('dish', 'id'), (select max(id) from dish));
                     select setval(pg_get_serial_sequence('ingredient', 'id'), (select max(id) from ingredient));
                     select setval(pg_get_serial_sequence('dish_ingredient', 'id'), (select max(id) from dish_ingredient));
+                    select setval(pg_get_serial_sequence('stock_movement', 'id'), (select max(id) from stock_movement));
                 """;
         try {
             DBConnection dbConnection = new DBConnection();

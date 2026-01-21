@@ -1,6 +1,7 @@
 package secondTd.model;
 
 import java.time.Instant;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 
@@ -112,23 +113,22 @@ public class Ingredient {
     }
 
     public StockValue getStockValueAt(Instant t) {
-        StockMovement stockRelatedToInstantT = null;
-        for (StockMovement stockMovement: this.stockMovementList) {
-            if (stockMovement.getCreationDatetime().isBefore(t)) {
-                if (stockRelatedToInstantT == null) {
-                    stockRelatedToInstantT = stockMovement;
-                } else {
-                    if (stockRelatedToInstantT.getCreationDatetime().isBefore(stockMovement.getCreationDatetime())) {
-                        stockRelatedToInstantT = stockMovement;
-                    }
+        List<StockMovement> sortedStockMovement = this.stockMovementList.stream()
+                .sorted(Comparator.comparing(StockMovement::getCreationDatetime))
+                .toList();
+        StockValue remainingStockValue = new StockValue();
+        remainingStockValue.setUnit(sortedStockMovement.get(0).getValue().getUnit());
+        Double remainingQuantity = 0.00;
+        for (StockMovement sortedStockMovementElement: sortedStockMovement) {
+            if (sortedStockMovementElement.getCreationDatetime().isBefore(t) || sortedStockMovementElement.getCreationDatetime().equals(t)) {
+                if (sortedStockMovementElement.getType() == StockMovement.MovementTypeEnum.IN) {
+                    remainingQuantity += sortedStockMovementElement.getValue().getQuantity();
+                } else if (sortedStockMovementElement.getType() == StockMovement.MovementTypeEnum.OUT) {
+                    remainingQuantity -= sortedStockMovementElement.getValue().getQuantity();
                 }
             }
         }
-        if (stockRelatedToInstantT == null) {
-            throw new IllegalArgumentException("Cannot get stock value of empty stock");
-        }
-        return stockRelatedToInstantT.getValue();
+        remainingStockValue.setQuantity(remainingQuantity);
+        return remainingStockValue;
     }
-
-
 }

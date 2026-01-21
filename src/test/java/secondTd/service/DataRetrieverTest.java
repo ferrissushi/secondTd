@@ -12,6 +12,7 @@ import secondTd.model.Ingredient.CategoryEnum;
 import secondTd.service.utils.TestUtils;
 
 import java.sql.SQLException;
+import java.time.Instant;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -196,5 +197,13 @@ class DataRetrieverTest {
     void should_return_dish_selling_price_ok(Integer dishId, Double expectedSellingPrice) {
         Double dishSellingPrice = dataRetriever.findDishPriceById(dishId);
         assertEquals(expectedSellingPrice, dishSellingPrice);
+    }
+
+    @ParameterizedTest
+    @CsvSource(value = {"1, 4.8", "2, 3.85", "3, 9.0", "4, 2.7", "5, 2.3"})
+    void should_return_remaining_stock(Integer id, Double stock) {
+        Ingredient ingredient = dataRetriever.findIngredientById(id);
+        Double remainingStock = ingredient.getStockValueAt(Instant.parse("2024-01-06T12:00:00Z")).getQuantity();
+        assertEquals(stock, remainingStock);
     }
 }

@@ -11,6 +11,10 @@ public class StockValue {
         this.unit = unit;
     }
 
+    public StockValue() {
+
+    }
+
     @Override
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) return false;
