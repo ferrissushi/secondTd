@@ -217,9 +217,9 @@ public class DataRetriever {
         }
     }
 
-    public Dish findDishPriceById(Integer id) {
+    public Double findDishPriceById(Integer id) {
         String sql = """
-                    select id, price from dish where id = ?;
+                    select selling_price from dish where id = ?;
                 """;
         Connection connection = null;
         PreparedStatement ps = null;
@@ -227,21 +227,25 @@ public class DataRetriever {
 
         try {
             connection = dbConnection.getConnection();
-            List<DishIngredient> ingredients = findDishIngredientByDishId(id, connection);
             ps = connection.prepareStatement(sql);
             ps.setInt(1, id);
 
             rs = ps.executeQuery();
 
-            return rs.next() ? mapToDish(rs, ingredients) : null;
+            if (rs.next()) {
+                Double sellingPrice = null;
+                if (rs.getObject("selling_price") != null) {
+                    sellingPrice = rs.getObject("selling_price", BigDecimal.class).doubleValue();
+                }
+                return sellingPrice;
+            }
+            return null;
         } catch (SQLException e) {
             throw new RuntimeException(e);
         } finally {
             dbConnection.closeJDBCRessources(connection, ps, rs);
         }
     }
-
-    ;
 
     public List<Ingredient> unhandledCreateIngredients(
             List<Ingredient> newIngredients) throws SQLException {

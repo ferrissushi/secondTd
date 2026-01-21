@@ -190,4 +190,11 @@ class DataRetrieverTest {
         Dish dish = dataRetriever.findDishById(dishId);
         assertThrows(RuntimeException.class, dish::getGrossMargin);
     }
+
+    @ParameterizedTest
+    @CsvSource(value = {"1, 3500.00", "2, 12000.00", "3, null", "4, 8000.00", "5, null"}, nullValues = {"null"})
+    void should_return_dish_selling_price_ok(Integer dishId, Double expectedSellingPrice) {
+        Double dishSellingPrice = dataRetriever.findDishPriceById(dishId);
+        assertEquals(expectedSellingPrice, dishSellingPrice);
+    }
 }
