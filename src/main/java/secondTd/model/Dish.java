@@ -12,16 +12,16 @@ public class Dish {
     private DishTypeEnum dishType;
     private Double sellingPrice;
 
-    private List<Ingredient> ingredients;
+    private List<DishIngredient> ingredients;
 
-    public Dish(Integer id, String name, DishTypeEnum dishType, List<Ingredient> ingredients) {
+    public Dish(Integer id, String name, DishTypeEnum dishType, List<DishIngredient> ingredients) {
         this.id = id;
         this.name = name;
         this.dishType = dishType;
         this.ingredients = ingredients;
     }
 
-    public Dish(Integer id, String name, DishTypeEnum dishType, List<Ingredient> ingredients, Double sellingPrice) {
+    public Dish(Integer id, String name, DishTypeEnum dishType, List<DishIngredient> ingredients, Double sellingPrice) {
         this.id = id;
         this.name = name;
         this.dishType = dishType;
@@ -66,7 +66,7 @@ public class Dish {
     }
 
     public Double getDishCost() {
-        return ingredients.stream().mapToDouble(Ingredient::getTotalPrice).sum();
+        return ingredients.stream().mapToDouble(DishIngredient::getTotalPrice).sum();
     }
 
     public Integer getId() {
@@ -85,15 +85,15 @@ public class Dish {
         this.name = name;
     }
 
-    public List<Ingredient> getIngredients() {
+    public List<DishIngredient> getIngredients() {
         return ingredients;
     }
 
-    public void setIngredients(List<Ingredient> ingredients) {
+    public void setIngredients(List<DishIngredient> ingredients) {
         if (ingredients == null) {
             throw new IllegalArgumentException("Ingredient list cannot be null");
         }
-        for (Ingredient ingredient : ingredients) {
+        for (DishIngredient ingredient : ingredients) {
             ingredient.setDish(this);
         }
         this.ingredients = ingredients;

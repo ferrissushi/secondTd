@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import secondTd.model.Dish;
+import secondTd.model.DishIngredient;
 import secondTd.model.Ingredient;
 import secondTd.model.Ingredient.CategoryEnum;
 import secondTd.service.utils.TestUtils;
@@ -30,8 +31,8 @@ class DataRetrieverTest {
     void should_find_dish_by_id_ok() {
         Dish dish = dataRetriever.findDishById(1);
         assertEquals("Salade fraiche", dish.getName());
-        assertEquals("Laitue", dish.getIngredients().get(0).getName());
-        assertEquals("Tomate", dish.getIngredients().get(1).getName());
+        assertEquals("Laitue", dish.getIngredients().get(0).getIngredient().getName());
+        assertEquals("Tomate", dish.getIngredients().get(1).getIngredient().getName());
     }
 
     @Test
@@ -148,13 +149,15 @@ class DataRetrieverTest {
             String expectedDishName,
             Double dishPrice
     ) {
-        Ingredient ingredient1 = new Ingredient();
+        DishIngredient ingredient1 = new DishIngredient();
+        Ingredient ingredient = new Ingredient();
         ingredient1.setId(ingredientId);
-        ingredient1.setName(ingredientName);
-        ingredient1.setPrice(ingredientPrice);
-        ingredient1.setCategory(ingredientCategory);
+        ingredient.setName(ingredientName);
+        ingredient.setPrice(ingredientPrice);
+        ingredient.setCategory(ingredientCategory);
         ingredient1.setQuantityRequired(2.50);
-        ingredient1.setUnit(Ingredient.UnitType.KG);
+        ingredient1.setUnit(DishIngredient.UnitType.KG);
+        ingredient1.setIngredient(ingredient);
         Dish dish = new Dish();
         dish.setId(dishId);
         dish.setName(dishName);
@@ -163,5 +166,28 @@ class DataRetrieverTest {
         dish.setPrice(dishPrice);
         Dish dishInserted = dataRetriever.saveDish(dish);
         assertEquals(expectedDishName, dishInserted.getName());
+    }
+
+    @ParameterizedTest
+    @CsvSource(value = {"1, 250.00", "2, 4500.00", "3, 0.00", "4, 1400.00", "5, 0.00"})
+    void should_return_dish_cost(Integer dishId, Double expectedDishCost) {
+        Dish dish = dataRetriever.findDishById(dishId);
+        Double dishCost = dish.getDishCost();
+        assertEquals(expectedDishCost, dishCost);
+    }
+
+    @ParameterizedTest
+    @CsvSource(value = {"1, 3250.00", "2, 7500.00", "4, 6600.00"})
+    void should_return_gross_margin_ok(Integer dishId, Double expectedGrossMargin) {
+        Dish dish = dataRetriever.findDishById(dishId);
+        Double grossMargin = dish.getGrossMargin();
+        assertEquals(expectedGrossMargin, grossMargin);
+    }
+
+    @ParameterizedTest
+    @CsvSource(value = {"3", "5"})
+    void should_return_gross_margin_ko(Integer dishId) {
+        Dish dish = dataRetriever.findDishById(dishId);
+        assertThrows(RuntimeException.class, dish::getGrossMargin);
     }
 }
