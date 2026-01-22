@@ -614,9 +614,9 @@ public class DataRetriever {
 
     public Ingredient saveIngredient(Ingredient toSave) {
         String ingredientSql = """
-                insert into ingredient (id, name, price, category) values (?, ?, ?, ?::ingredient_category) 
+                insert into ingredient (id, name, price, category) values (?, ?, ?, ?::ingredient_category)
                 on conflict (id) do
-                update set id = excluded.id, name = excluded.name, 
+                update set id = excluded.id, name = excluded.name,
                 price = excluded.price, category = excluded.category::ingredient_category
                 returning id, name, price, category;
                 """;
@@ -709,11 +709,7 @@ public class DataRetriever {
             ResultSet rs = ps.executeQuery();
 
             while (rs.next()) {
-                StockMovement stockMovement = new StockMovement();
-                stockMovement.setId(rs.getInt("id"));
-                stockMovement.setValue(new StockValue(rs.getDouble("quantity"), DishIngredient.UnitType.valueOf(rs.getString("unit"))));
-                stockMovement.setType(StockMovement.MovementTypeEnum.valueOf(rs.getString("type")));
-                stockMovement.setCreationDatetime(rs.getTimestamp("creation_datetime").toInstant());
+                StockMovement stockMovement = mapToStockMovement(rs);
                 stockMovements.add(stockMovement);
             }
             dbConnection.closeJDBCRessources(rs, ps);
@@ -723,5 +719,14 @@ public class DataRetriever {
         } finally {
             dbConnection.closeJDBCRessources(connection);
         }
+    }
+
+    public StockMovement mapToStockMovement(ResultSet rs ) throws SQLException {
+        StockMovement stockMovement = new StockMovement();
+        stockMovement.setId(rs.getInt("id"));
+        stockMovement.setValue(new StockValue(rs.getDouble("quantity"), DishIngredient.UnitType.valueOf(rs.getString("unit"))));
+        stockMovement.setType(StockMovement.MovementTypeEnum.valueOf(rs.getString("type")));
+        stockMovement.setCreationDatetime(rs.getTimestamp("creation_datetime").toInstant());
+        return stockMovement;
     }
 }
