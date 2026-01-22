@@ -729,4 +729,85 @@ public class DataRetriever {
         stockMovement.setCreationDatetime(rs.getTimestamp("creation_datetime").toInstant());
         return stockMovement;
     }
+    
+    public Order saveOrder(Order orderToSave) {
+        String orderSql = """
+                    insert into "order" (id, reference, creation_datetime)
+                    values (?, ?, ?) returning id, reference, creation_datetime;
+                """;
+        String dishOrderSql = """
+                    insert into dish_order (id, id_order, id_dish, quantity)
+                    values (?, ?, ?, ?) returning id, id_order, id_dish, quantity;
+                """;
+        checkIngredientsAvailability(orderToSave);
+        Connection connection = null;
+        Order orderSaved = new Order();
+        List<DishOrder> dishOrdersSaved = new ArrayList<>();
+        try {
+            connection = dbConnection.getConnection();
+            PreparedStatement orderPs = connection.prepareStatement(orderSql);
+
+            orderPs.setInt(1, orderToSave.getId());
+            orderPs.setString(2, orderToSave.getReference());
+            orderPs.setTimestamp(3, Timestamp.from(orderToSave.getCreationDatetime()));
+            ResultSet orderRs = orderPs.executeQuery();
+            for (DishOrder dishOrder: orderToSave.getDishOrders()) {
+                PreparedStatement dishOrderPs = connection.prepareStatement(dishOrderSql);
+                dishOrderPs.setInt(1, dishOrder.getId());
+                dishOrderPs.setInt(2, orderToSave.getId());
+                dishOrderPs.setInt(3, dishOrder.getDish().getId());
+                dishOrderPs.setInt(4, dishOrder.getQuantity());
+
+                ResultSet dishOrderRs = dishOrderPs.executeQuery();
+
+                if (dishOrderRs.next()) {
+                    DishOrder dishOrderSaved = new DishOrder();
+                    dishOrderSaved.setId(dishOrderRs.getInt("id"));
+                    dishOrderSaved.setDish(findDishById(dishOrderRs.getInt("id_dish")));
+                    dishOrderSaved.setQuantity(dishOrderRs.getInt("quantity"));
+
+                    dishOrdersSaved.add(dishOrderSaved);
+                }
+                dbConnection.closeJDBCRessources(dishOrderRs, dishOrderPs);
+            }
+            if (orderRs.next()) {
+                orderSaved.setDishOrders(dishOrdersSaved);
+                orderSaved.setReference(orderRs.getString("reference"));
+                orderSaved.setId(orderRs.getInt("id"));
+                orderSaved.setCreationDatetime(orderRs.getTimestamp("creation_datetime").toInstant());
+            }
+            dbConnection.closeJDBCRessources(orderRs, orderPs);
+            return orderSaved;
+        } catch (SQLException error) {
+            throw new RuntimeException(error);
+        } finally {
+            dbConnection.closeJDBCRessources(connection);
+        }
+    }
+
+    public void checkIngredientsAvailability(Order orderToSave) {
+        List<DishOrder> dishOrders = orderToSave.getDishOrders();
+        for (DishOrder order: dishOrders) {
+            Dish dish = order.getDish();
+            checkDishIngredientAvailability(dish, order, orderToSave.getCreationDatetime());
+        }
+    }
+
+    public void checkDishIngredientAvailability(Dish dish,
+                                                DishOrder dishOrderToSave,
+                                                Instant orderToSaveCreationDatetime) {
+        List<DishIngredient> dishIngredients = dish.getIngredients();
+        for (DishIngredient dishIngredient: dishIngredients) {
+            Double requiredIngredientQuantityForDish =
+                    dishIngredient.getQuantityRequired() * dishOrderToSave.getQuantity();
+            Integer ingredientId = dishIngredient.getIngredient().getId();
+            Ingredient ingredient = findIngredientById(ingredientId);
+            StockValue currentStockValue = ingredient.getStockValueAt(orderToSaveCreationDatetime);
+            Double currentStockValueQuantity = currentStockValue.getQuantity();
+            if (currentStockValueQuantity < requiredIngredientQuantityForDish) {
+                throw new IllegalStateException(ingredient.getName() + "'s current stock is not enough for this command");
+            }
+        }
+    }
+
 }
