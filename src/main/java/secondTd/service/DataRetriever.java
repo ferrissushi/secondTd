@@ -820,7 +820,8 @@ public class DataRetriever {
             ResultSet rs = ps.executeQuery();
             if (rs.next()) {
                 PreparedStatement dishOrderPs = connection.prepareStatement(dishOrderSql);
-                dishOrderPs.setInt(1, order.getId());
+                Integer orderId = rs.getInt("id");
+                dishOrderPs.setInt(1, orderId);
                 ResultSet dishOrderRs = dishOrderPs.executeQuery();
                 while (dishOrderRs.next()) {
                     DishOrder dishOrder = mapToDishOrders(dishOrderRs);

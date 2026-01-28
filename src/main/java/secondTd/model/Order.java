@@ -50,4 +50,14 @@ public class Order {
     public Double getTotalAmountWithVAT() {
         return getTotalAmountWithoutVAT() * (1.20); //.......VAT 20%
     }
+
+    @Override
+    public String toString() {
+        return "Order{" +
+                "dishOrders=" + dishOrders +
+                ", creationDatetime=" + creationDatetime +
+                ", reference='" + reference + '\'' +
+                ", id=" + id +
+                '}';
+    }
 }

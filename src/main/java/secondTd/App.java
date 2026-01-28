@@ -6,6 +6,7 @@ import java.util.List;
 import secondTd.model.Dish;
 import secondTd.model.Ingredient;
 import secondTd.model.Dish.DishTypeEnum;
+import secondTd.model.Order;
 import secondTd.service.DataRetriever;
 
 public class App {
@@ -147,9 +148,8 @@ public class App {
         // Dish savedDish3 = retriever.saveDish(dish3);
         // System.out.println(savedDish3.getGrossMargin());
 
-        Dish dish = retriever.findDishById(5);
-        Double dishCost = dish.getGrossMargin();
-        System.out.println(dishCost);
+        Order order = retriever.findOrderByReference("ORD00001");
+        System.out.println(order.toString());
     }
 
 }

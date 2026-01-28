@@ -10,6 +10,8 @@ public class TestUtils {
 
     public void insertDatabaseTestData() {
         String sql = """
+                    delete from dish_order;
+                    delete from "order";
                     delete from stock_movement;
                     delete from dish_ingredient;
                     delete from ingredient;
@@ -47,7 +49,16 @@ public class TestUtils {
                         (8, 4, 0.3, 'OUT', 'KG', '2024-01-06 14:00'),
                         (9, 5, 2.5, 'IN', 'KG', '2024-01-05 10:00'),
                         (10, 5, 0.2, 'OUT', 'KG', '2024-01-06 14:00');
-                        
+
+                    insert into "order" (id, reference, creation_datetime) values
+                      (1, 'ORD00001', '2024-01-01 00:00'),
+                      (2, 'ORD00002', '2024-01-02 00:00');
+                    
+                    insert into dish_order (id, id_order, id_dish, quantity) values
+                        (1, 1, 1, 2), (2, 1, 2, 2), (1, 2, 3, 1);
+
+                    select setval(pg_get_serial_sequence('order', 'id'), (select max(id) from "order"));
+                    select setval(pg_get_serial_sequence('dish_order', 'id'), (select max(id) from dish_order));
                     select setval(pg_get_serial_sequence('dish', 'id'), (select max(id) from dish));
                     select setval(pg_get_serial_sequence('ingredient', 'id'), (select max(id) from ingredient));
                     select setval(pg_get_serial_sequence('dish_ingredient', 'id'), (select max(id) from dish_ingredient));

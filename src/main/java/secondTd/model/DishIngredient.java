@@ -7,6 +7,16 @@ public class DishIngredient {
     private Double requiredQuantity;
     private UnitType unit;
 
+    @Override
+    public String toString() {
+        return "DishIngredient{" +
+                "id=" + id +
+                ", ingredient=" + ingredient +
+                ", requiredQuantity=" + requiredQuantity +
+                ", unit=" + unit +
+                '}';
+    }
+
     public enum UnitType {
         PCS, KG, L
     }
