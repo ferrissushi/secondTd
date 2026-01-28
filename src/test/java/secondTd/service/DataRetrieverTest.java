@@ -7,8 +7,10 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import secondTd.model.Dish;
 import secondTd.model.DishIngredient;
+import secondTd.model.DishOrder;
 import secondTd.model.Ingredient;
 import secondTd.model.Ingredient.CategoryEnum;
+import secondTd.model.Order;
 import secondTd.service.utils.TestUtils;
 
 import java.sql.SQLException;
@@ -205,5 +207,29 @@ class DataRetrieverTest {
         Ingredient ingredient = dataRetriever.findIngredientById(id);
         Double remainingStock = ingredient.getStockValueAt(Instant.parse("2024-01-06T12:00:00Z")).getQuantity();
         assertEquals(stock, remainingStock);
+    }
+
+    @Test
+    void should_insert_dish_ok() {
+        Dish dish = dataRetriever.findDishById(1);
+        Dish dish2 = dataRetriever.findDishById(2);
+
+        DishOrder dishOrder = new DishOrder();
+        dishOrder.setId(4);
+        dishOrder.setDish(dish);
+        dishOrder.setQuantity(2);
+
+        DishOrder dishOrder2 = new DishOrder();
+        dishOrder2.setId(5);
+        dishOrder2.setDish(dish2);
+        dishOrder2.setQuantity(2);
+
+        Order order = new Order();
+        order.setId(5);
+        order.setReference("ORD00004");
+        order.setCreationDatetime(Instant.parse("2024-01-08T00:00:00Z"));
+        order.setDishOrders(List.of(dishOrder, dishOrder2));
+
+
     }
 }

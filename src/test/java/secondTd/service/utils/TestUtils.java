@@ -53,9 +53,9 @@ public class TestUtils {
                     insert into "order" (id, reference, creation_datetime) values
                       (1, 'ORD00001', '2024-01-01 00:00'),
                       (2, 'ORD00002', '2024-01-02 00:00');
-                    
+
                     insert into dish_order (id, id_order, id_dish, quantity) values
-                        (1, 1, 1, 2), (2, 1, 2, 2), (1, 2, 3, 1);
+                        (1, 1, 1, 2), (2, 1, 2, 2), (3, 2, 3, 1);
 
                     select setval(pg_get_serial_sequence('order', 'id'), (select max(id) from "order"));
                     select setval(pg_get_serial_sequence('dish_order', 'id'), (select max(id) from dish_order));

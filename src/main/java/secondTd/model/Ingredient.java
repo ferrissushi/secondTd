@@ -5,6 +5,8 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 
+import secondTd.util.UnitCaster;
+
 public class Ingredient {
 
     public enum CategoryEnum {
@@ -105,12 +107,22 @@ public class Ingredient {
         StockValue remainingStockValue = new StockValue();
         remainingStockValue.setUnit(sortedStockMovement.get(0).getValue().getUnit());
         Double remainingQuantity = 0.00;
+
         for (StockMovement sortedStockMovementElement: sortedStockMovement) {
-            if (sortedStockMovementElement.getCreationDatetime().isBefore(t) || sortedStockMovementElement.getCreationDatetime().equals(t)) {
+
+            if (sortedStockMovementElement.getCreationDatetime().isBefore(t)
+                    || sortedStockMovementElement.getCreationDatetime().equals(t)) {
+
                 if (sortedStockMovementElement.getType() == StockMovement.MovementTypeEnum.IN) {
                     remainingQuantity += sortedStockMovementElement.getValue().getQuantity();
+
                 } else if (sortedStockMovementElement.getType() == StockMovement.MovementTypeEnum.OUT) {
-                    remainingQuantity -= sortedStockMovementElement.getValue().getQuantity();
+                    Double quantity = sortedStockMovementElement.getValue().getQuantity();
+                    String ingredientName = this.name;
+                    Double quantityConverted = UnitCaster.convertTo(quantity,
+                            sortedStockMovementElement.getValue().getUnit(),
+                            ingredientName);
+                    remainingQuantity -= quantityConverted;
                 }
             }
         }

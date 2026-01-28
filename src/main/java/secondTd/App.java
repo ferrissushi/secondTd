@@ -1,6 +1,9 @@
 package secondTd;
 
+import secondTd.model.DishOrder;
 import secondTd.model.Ingredient.CategoryEnum;
+
+import java.time.Instant;
 import java.util.List;
 
 import secondTd.model.Dish;
@@ -148,8 +151,8 @@ public class App {
         // Dish savedDish3 = retriever.saveDish(dish3);
         // System.out.println(savedDish3.getGrossMargin());
 
-        Order order = retriever.findOrderByReference("ORD00001");
-        System.out.println(order.toString());
+        Ingredient ingredient = retriever.findIngredientById(2);
+        System.out.println(ingredient.getStockValueAt(Instant.now()).getQuantity());
     }
 
 }
