@@ -729,7 +729,7 @@ public class DataRetriever {
         stockMovement.setCreationDatetime(rs.getTimestamp("creation_datetime").toInstant());
         return stockMovement;
     }
-    
+
     public Order saveOrder(Order orderToSave) {
         String orderSql = """
                     insert into "order" (id, reference, creation_datetime)
@@ -761,20 +761,13 @@ public class DataRetriever {
                 ResultSet dishOrderRs = dishOrderPs.executeQuery();
 
                 if (dishOrderRs.next()) {
-                    DishOrder dishOrderSaved = new DishOrder();
-                    dishOrderSaved.setId(dishOrderRs.getInt("id"));
-                    dishOrderSaved.setDish(findDishById(dishOrderRs.getInt("id_dish")));
-                    dishOrderSaved.setQuantity(dishOrderRs.getInt("quantity"));
-
+                    DishOrder dishOrderSaved = mapToDishOrders(dishOrderRs);
                     dishOrdersSaved.add(dishOrderSaved);
                 }
                 dbConnection.closeJDBCRessources(dishOrderRs, dishOrderPs);
             }
             if (orderRs.next()) {
-                orderSaved.setDishOrders(dishOrdersSaved);
-                orderSaved.setReference(orderRs.getString("reference"));
-                orderSaved.setId(orderRs.getInt("id"));
-                orderSaved.setCreationDatetime(orderRs.getTimestamp("creation_datetime").toInstant());
+                orderSaved = mapToOrder(orderRs, dishOrdersSaved);
             }
             dbConnection.closeJDBCRessources(orderRs, orderPs);
             return orderSaved;
@@ -810,4 +803,56 @@ public class DataRetriever {
         }
     }
 
+    public Order findOrderByReference(String reference) {
+        String orderSql = """
+            select id, reference, creation_datetime from "order" where reference = ?;
+            """;
+        String dishOrderSql = """
+            select id, id_order, id_dish, quantity from dish_order where id_order = ?;
+            """;
+        Connection connection = null;
+        List<DishOrder> dishOrders = new ArrayList<>();
+        Order order = new Order();
+        try {
+            connection = dbConnection.getConnection();
+            PreparedStatement ps = connection.prepareStatement(orderSql);
+            ps.setString(1, reference);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                PreparedStatement dishOrderPs = connection.prepareStatement(dishOrderSql);
+                dishOrderPs.setInt(1, order.getId());
+                ResultSet dishOrderRs = dishOrderPs.executeQuery();
+                while (dishOrderRs.next()) {
+                    DishOrder dishOrder = mapToDishOrders(dishOrderRs);
+                    dishOrders.add(dishOrder);
+                }
+                order = mapToOrder(rs, dishOrders);
+                dbConnection.closeJDBCRessources(rs, ps);
+            } else {
+                throw new RuntimeException("Order with reference " + reference + " not found");
+            }
+            return order;
+        } catch (SQLException error) {
+            throw new RuntimeException(error);
+        } finally {
+            dbConnection.closeJDBCRessources(connection);
+        }
+    }
+
+    public DishOrder mapToDishOrders(ResultSet rs) throws SQLException {
+        DishOrder dishOrder = new DishOrder();
+        dishOrder.setId(rs.getInt("id"));
+        dishOrder.setDish(findDishById(rs.getInt("id_dish")));
+        dishOrder.setQuantity(rs.getInt("quantity"));
+        return dishOrder;
+    }
+
+    public Order mapToOrder(ResultSet rs, List<DishOrder> dishOrders) throws SQLException {
+        Order order = new Order();
+        order.setId(rs.getInt("id"));
+        order.setReference(rs.getString("reference"));
+        order.setCreationDatetime(rs.getTimestamp("creation_datetime").toInstant());
+        order.setDishOrders(dishOrders);
+        return order;
+    }
 }
