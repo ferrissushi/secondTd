@@ -934,7 +934,6 @@ public class DataRetriever {
         try {
             connection = dbConnection.getConnection();
             PreparedStatement ps = connection.prepareStatement(sql);
-            ps.setInt(1, idTable);
             ResultSet rs = ps.executeQuery();
             while (rs.next()) {
                 avalaibleTableNumbers.add(rs.getInt("number"));
