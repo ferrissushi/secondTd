@@ -202,10 +202,10 @@ class DataRetrieverTest {
     }
 
     @ParameterizedTest
-    @CsvSource(value = {"1, 4.8", "2, 3.85", "3, 9.0", "4, 2.7", "5, 2.3"})
+    @CsvSource(value = {"1, 4.0", "2, 3.5", "3, 9.5", "4, 2.6", "5, 2.3"})
     void should_return_remaining_stock(Integer id, Double stock) {
         Ingredient ingredient = dataRetriever.findIngredientById(id);
-        Double remainingStock = ingredient.getStockValueAt(Instant.parse("2024-01-06T12:00:00Z")).getQuantity();
+        Double remainingStock = ingredient.getStockValueAt(Instant.now()).getQuantity();
         assertEquals(stock, remainingStock);
     }
 
@@ -229,7 +229,44 @@ class DataRetrieverTest {
         order.setReference("ORD00004");
         order.setCreationDatetime(Instant.parse("2024-01-08T00:00:00Z"));
         order.setDishOrders(List.of(dishOrder, dishOrder2));
+    }
 
+    @Test
+    void should_insert_order_ko() {
+        Dish dish = dataRetriever.findDishById(2);
 
+        DishOrder dishOrder1 = new DishOrder();
+        dishOrder1.setId(4);
+        dishOrder1.setQuantity(10);
+        dishOrder1.setDish(dish);
+
+        Order order = new Order();
+        order.setId(3);
+        order.setCreationDatetime(Instant.now());
+        order.setReference("ORD00005");
+        order.setDishOrders(List.of(dishOrder1));
+
+        assertThrows((IllegalStateException.class), () -> {
+            dataRetriever.saveOrder(order);
+        });
+    }
+
+    @Test
+    void should_insert_order_ok() {
+        Dish dish = dataRetriever.findDishById(2);
+
+        DishOrder dishOrder1 = new DishOrder();
+        dishOrder1.setId(4);
+        dishOrder1.setQuantity(1);
+        dishOrder1.setDish(dish);
+
+        Order order = new Order();
+        order.setId(3);
+        order.setCreationDatetime(Instant.now());
+        order.setReference("ORD00005");
+        order.setDishOrders(List.of(dishOrder1));
+
+        dataRetriever.saveOrder(order);
+        assertEquals(8.5 ,dataRetriever.findIngredientById(3).getStockValueAt(Instant.now()).getQuantity());
     }
 }

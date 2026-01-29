@@ -745,18 +745,13 @@ public class DataRetriever {
                     values (?, ?, ?, ?)
                     returning id, id_order, id_dish, quantity;
                 """;
-        String updateStockSQL = """
-                insert into stock_movement (id_ingredient, quantity, type, unit, creation_datetime)
-                values (?, ?, ?, ?::unit_type, ?);
-                """;
+        checkIngredientsAvailability(orderToSave);
         Connection connection = null;
         Order orderSaved = new Order();
         List<DishOrder> dishOrdersSaved = new ArrayList<>();
         try {
             connection = dbConnection.getConnection();
             PreparedStatement orderPs = connection.prepareStatement(orderSql);
-            PreparedStatement updateStockPS = connection.prepareStatement(updateStockSQL);
-            checkIngredientsAvailability(orderToSave, updateStockPS);
 
             orderPs.setInt(1, orderToSave.getId());
             orderPs.setString(2, orderToSave.getReference());
@@ -780,7 +775,6 @@ public class DataRetriever {
             if (orderRs.next()) {
                 orderSaved = mapToOrder(orderRs, dishOrdersSaved);
             }
-            updateStockPS.executeBatch();
             dbConnection.closeJDBCRessources(orderRs, orderPs);
             return orderSaved;
         } catch (SQLException error) {
@@ -790,11 +784,23 @@ public class DataRetriever {
         }
     }
 
-    public void checkIngredientsAvailability(Order orderToSave, PreparedStatement updateStockPS) {
+    public void checkIngredientsAvailability(Order orderToSave) {
         List<DishOrder> dishOrders = orderToSave.getDishOrders();
-        for (DishOrder order : dishOrders) {
-            Dish dish = order.getDish();
-            checkDishIngredientAvailability(dish, order, orderToSave.getCreationDatetime(), updateStockPS);
+        String updateStockSQL = """
+                insert into stock_movement (id_ingredient, quantity, type, unit, creation_datetime)
+                values (?, ?, 'OUT', ?::unit_type, ?);
+                """;
+        try {
+            Connection connection = dbConnection.getConnection();
+            PreparedStatement updateStockPS = connection.prepareStatement(updateStockSQL);
+            for (DishOrder order : dishOrders) {
+                Dish dish = order.getDish();
+                checkDishIngredientAvailability(dish, order, orderToSave.getCreationDatetime(), updateStockPS);
+            }
+            updateStockPS.executeBatch();
+            dbConnection.closeJDBCRessources(updateStockPS, connection);
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
         }
     }
 
@@ -825,12 +831,10 @@ public class DataRetriever {
         try {
             updateStockPS.setInt(1, dishIngredient.getIngredient().getId());
             updateStockPS.setDouble(2, requiredIngredientQuantityForDish);
-            updateStockPS.setString(3, StockMovement.MovementTypeEnum.OUT.toString());
-            updateStockPS.setString(4, dishIngredient.getUnit().toString());
-            updateStockPS.setTimestamp(5, Timestamp.from(orderToSaveCreationDatetime));
+            updateStockPS.setString(3, dishIngredient.getUnit().toString());
+            updateStockPS.setTimestamp(4, Timestamp.from(orderToSaveCreationDatetime));
 
             updateStockPS.addBatch();
-            dbConnection.closeJDBCRessources(updateStockPS);
         } catch (SQLException error) {
             throw new RuntimeException(error);
         }
@@ -889,5 +893,4 @@ public class DataRetriever {
         order.setDishOrders(dishOrders);
         return order;
     }
-
 }
