@@ -8,6 +8,15 @@ public class Order {
     private String reference;
     private Instant creationDatetime;
     private List<DishOrder> dishOrders;
+    private TableOrder table;
+
+    public TableOrder getTable() {
+        return table;
+    }
+
+    public void setTable(TableOrder table) {
+        this.table = table;
+    }
 
     public Integer getId() {
         return id;

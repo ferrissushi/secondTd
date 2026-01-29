@@ -734,18 +734,21 @@ public class DataRetriever {
 
     public Order saveOrder(Order orderToSave) {
         String orderSql = """
-                    insert into "order" (id, reference, creation_datetime)
-                    values (?, ?, ?)
+                    insert into "order" (id, reference, creation_datetime, id_table, arrival_datetime, departure_datetime)
+                    values (?, ?, ?, ?, ?, ?)
                     on conflict (id) do update
-                    set reference = excluded.reference, creation_datetime = excluded.creation_datetime
-                    returning id, reference, creation_datetime;
+                    set reference = excluded.reference, creation_datetime = excluded.creation_datetime,
+                    id_table = excluded.id_table, arrival_datetime = excluded.arrival_datetime
+                    returning id, reference, creation_datetime, id_table, arrival_datetime, departure_datetime;
                 """;
         String dishOrderSql = """
                     insert into dish_order (id, id_order, id_dish, quantity)
                     values (?, ?, ?, ?)
                     returning id, id_order, id_dish, quantity;
                 """;
+        checkTableAvalaibility(orderToSave);
         checkIngredientsAvailability(orderToSave);
+
         Connection connection = null;
         Order orderSaved = new Order();
         List<DishOrder> dishOrdersSaved = new ArrayList<>();
@@ -756,6 +759,9 @@ public class DataRetriever {
             orderPs.setInt(1, orderToSave.getId());
             orderPs.setString(2, orderToSave.getReference());
             orderPs.setTimestamp(3, Timestamp.from(orderToSave.getCreationDatetime()));
+            orderPs.setInt(4, orderToSave.getTable().getTable().getId());
+            orderPs.setTimestamp(5, Timestamp.from(orderToSave.getTable().getArrivalDatetime()));
+            orderPs.setTimestamp(6, Timestamp.from(orderToSave.getTable().getDepartureDatetime()));
             ResultSet orderRs = orderPs.executeQuery();
             for (DishOrder dishOrder : orderToSave.getDishOrders()) {
                 PreparedStatement dishOrderPs = connection.prepareStatement(dishOrderSql);
@@ -891,6 +897,101 @@ public class DataRetriever {
         order.setReference(rs.getString("reference"));
         order.setCreationDatetime(rs.getTimestamp("creation_datetime").toInstant());
         order.setDishOrders(dishOrders);
+
+        Table table = findTableById(rs.getInt("id_table"));
+
+        TableOrder tableOrder = new TableOrder();
+        tableOrder.setTable(table);
+        tableOrder.setArrivalDatetime(rs.getTimestamp("arrival_datetime").toInstant());
+        tableOrder.setDepartureDatetime(rs.getTimestamp("departure_datetime").toInstant());
+        order.setTable(tableOrder);
         return order;
+    }
+
+    public void checkTableAvalaibility(Order orderToSave) {
+        Instant orderArrivalTime = orderToSave.getCreationDatetime();
+        Order order = findOrderByIdTableAndDepartureDatetime(orderToSave.getTable().getTable().getId(), orderArrivalTime);
+        if (order == null) {
+            return;
+        }
+        List<Integer> avalaibleTableNumbers = findAvalaibleTableNumbers(orderToSave.getTable().getTable().getId());
+        String message = "Table " + avalaibleTableNumbers.toString() + " are avalaible";
+        throw new IllegalStateException(message);
+    }
+
+    public List<Integer> findAvalaibleTableNumbers(Integer idTable) {
+        String sql = """
+                select number
+                from "table" t
+                where not exists (
+                    select o.id_table
+                    from "order" o
+                    where o.id_table = t.id
+                );
+                """;
+        Connection connection = null;
+        List<Integer> avalaibleTableNumbers = new ArrayList<>();
+        try {
+            connection = dbConnection.getConnection();
+            PreparedStatement ps = connection.prepareStatement(sql);
+            ps.setInt(1, idTable);
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                avalaibleTableNumbers.add(rs.getInt("number"));
+            }
+            return avalaibleTableNumbers;
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        } finally {
+            dbConnection.closeJDBCRessources(connection);
+        }
+    }
+
+    private Table findTableById(Integer id) {
+        String sql = """
+                select id, number from "table" where id = ?;
+                """;
+        Connection connection = null;
+        Table table = new Table();
+        try {
+            connection = dbConnection.getConnection();
+            PreparedStatement ps = connection.prepareStatement(sql);
+            ps.setInt(1, id);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                table.setId(rs.getInt("id"));
+                table.setNumber(rs.getInt("number"));
+            }
+            return table;
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        } finally {
+            dbConnection.closeJDBCRessources(connection);
+        }
+    }
+
+    public Order findOrderByIdTableAndDepartureDatetime(Integer idTable, Instant departureDatetime) {
+        String sql = """
+            select id, reference, creation_datetime, id_table, arrival_datetime, departure_datetime
+            from "order"
+            where id_table = ? and departure_datetime < ?;
+            """;
+        Connection connection = null;
+        Order order = null;
+        try {
+            connection = dbConnection.getConnection();
+            PreparedStatement ps = connection.prepareStatement(sql);
+            ps.setInt(1, idTable);
+            ps.setTimestamp(2, Timestamp.from(departureDatetime));
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                order = mapToOrder(rs, null);
+            }
+            return order;
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        } finally {
+            dbConnection.closeJDBCRessources(connection);
+        }
     }
 }

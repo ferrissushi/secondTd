@@ -10,6 +10,7 @@ public class TestUtils {
 
     public void insertDatabaseTestData() {
         String sql = """
+                    delete from "table";
                     delete from dish_order;
                     delete from "order";
                     delete from stock_movement;
@@ -60,12 +61,15 @@ public class TestUtils {
                     insert into dish_order (id, id_order, id_dish, quantity) values
                         (1, 1, 1, 2), (2, 1, 2, 2), (3, 2, 3, 1);
 
+                    insert into "table" (id, number) values (1, 1), (2, 2), (3, 3), (4, 4), (5, 5);
+
                     select setval(pg_get_serial_sequence('order', 'id'), (select max(id) from "order"));
                     select setval(pg_get_serial_sequence('dish_order', 'id'), (select max(id) from dish_order));
                     select setval(pg_get_serial_sequence('dish', 'id'), (select max(id) from dish));
                     select setval(pg_get_serial_sequence('ingredient', 'id'), (select max(id) from ingredient));
                     select setval(pg_get_serial_sequence('dish_ingredient', 'id'), (select max(id) from dish_ingredient));
                     select setval(pg_get_serial_sequence('stock_movement', 'id'), (select max(id) from stock_movement));
+                    select setval(pg_get_serial_sequence('table', 'id'), (select max(id) from "table"));
                 """;
         try {
             DBConnection dbConnection = new DBConnection();
