@@ -947,7 +947,7 @@ public class DataRetriever {
         }
     }
 
-    private Table findTableById(Integer id) {
+    public Table findTableById(Integer id) {
         String sql = """
                 select id, number from "table" where id = ?;
                 """;
@@ -974,7 +974,7 @@ public class DataRetriever {
         String sql = """
             select id, reference, creation_datetime, id_table, arrival_datetime, departure_datetime
             from "order"
-            where id_table = ? and departure_datetime < ?;
+            where id_table = ? and departure_datetime > ?;
             """;
         Connection connection = null;
         Order order = null;
